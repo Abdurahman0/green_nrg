@@ -48,6 +48,16 @@ const asRecord = (value: unknown): Record<string, unknown> =>
 
 const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
   const headers = new Headers(init?.headers ?? {});
+  debugStore.push({
+    id: makeId(),
+    ts: Date.now(),
+    kind: 'log',
+    message: 'API: request invoked',
+    meta: {
+      path,
+      method: init?.method ?? 'GET',
+    },
+  });
   const initData = await waitForTelegramInitData();
   if (!initData) {
     debugStore.push({

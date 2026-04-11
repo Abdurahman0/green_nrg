@@ -7,6 +7,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
+import { debugStore, makeId } from '@/lib/debugStore';
 
 interface HomeProps {
   onNavigate: (tab: any) => void;
@@ -22,6 +23,12 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      debugStore.push({
+        id: makeId(),
+        ts: Date.now(),
+        kind: 'log',
+        message: 'Home: fetchData started',
+      });
       try {
         const [b, c, r] = await Promise.all([
           api.getBootstrap(),
@@ -31,8 +38,26 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
         setBootstrap(b);
         setCatalog(c);
         setReviews(r);
+        debugStore.push({
+          id: makeId(),
+          ts: Date.now(),
+          kind: 'log',
+          message: 'Home: fetchData success',
+          meta: {
+            products: c.products.length,
+            promoted: c.promoted_products.length,
+            reviews: r.length,
+          },
+        });
       } catch (error) {
         console.error(error);
+        debugStore.push({
+          id: makeId(),
+          ts: Date.now(),
+          kind: 'log',
+          message: 'Home: fetchData error',
+          meta: { error: error instanceof Error ? error.message : String(error) },
+        });
       } finally {
         setLoading(false);
       }

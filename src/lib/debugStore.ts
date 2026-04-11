@@ -11,7 +11,15 @@ export type DebugHttpEntry = {
   initDataLength?: number;
 };
 
-export type DebugEntry = DebugHttpEntry;
+export type DebugLogEntry = {
+  id: string;
+  ts: number;
+  kind: 'log';
+  message: string;
+  meta?: Record<string, string | number | boolean | null | undefined>;
+};
+
+export type DebugEntry = DebugHttpEntry | DebugLogEntry;
 
 type Listener = (entries: DebugEntry[]) => void;
 

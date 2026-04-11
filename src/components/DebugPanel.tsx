@@ -38,6 +38,10 @@ export const DebugPanel: React.FC = () => {
 
   if (!enabled) return null;
 
+  const apiBase =
+    (((import.meta as unknown as { env?: Record<string, string | undefined> }).env
+      ?.VITE_API_BASE_URL as string | undefined) ?? '').trim();
+
   return (
     <>
       <button
@@ -82,6 +86,9 @@ export const DebugPanel: React.FC = () => {
             </div>
 
             <div className="mt-2 text-[10px] text-gray-400 break-all">
+              API: {apiBase || '(empty)'}
+            </div>
+            <div className="mt-1 text-[10px] text-gray-400 break-all">
               {snapshot.search} {snapshot.hash}
             </div>
           </div>
@@ -92,19 +99,35 @@ export const DebugPanel: React.FC = () => {
             ) : (
               entries.map((e) => (
                 <div key={e.id} className="rounded-2xl border border-gray-100 bg-white p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="text-[11px] font-black text-gray-900">
-                      {e.method} {e.phase}
-                    </div>
-                    <div className="text-[11px] font-bold text-gray-600">
-                      {e.status !== undefined ? `status:${e.status}` : e.phase === 'error' ? 'error' : ''}
-                    </div>
-                  </div>
-                  <div className="mt-1 text-[10px] text-gray-500 break-all">{e.url}</div>
-                  <div className="mt-1 text-[10px] text-gray-400">
-                    initDataLen:{e.initDataLength ?? '-'} {e.ok !== undefined ? `ok:${e.ok}` : ''}
-                  </div>
-                  {e.error ? <div className="mt-1 text-[10px] text-red-600 break-all">{e.error}</div> : null}
+                  {e.kind === 'log' ? (
+                    <>
+                      <div className="text-[11px] font-black text-gray-900">LOG</div>
+                      <div className="mt-1 text-[10px] text-gray-600 break-all">{e.message}</div>
+                      {e.meta ? (
+                        <div className="mt-1 text-[10px] text-gray-400 break-all">
+                          {Object.entries(e.meta)
+                            .map(([k, v]) => `${k}:${String(v)}`)
+                            .join(' ')}
+                        </div>
+                      ) : null}
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-[11px] font-black text-gray-900">
+                          {e.method} {e.phase}
+                        </div>
+                        <div className="text-[11px] font-bold text-gray-600">
+                          {e.status !== undefined ? `status:${e.status}` : e.phase === 'error' ? 'error' : ''}
+                        </div>
+                      </div>
+                      <div className="mt-1 text-[10px] text-gray-500 break-all">{e.url}</div>
+                      <div className="mt-1 text-[10px] text-gray-400">
+                        initDataLen:{e.initDataLength ?? '-'} {e.ok !== undefined ? `ok:${e.ok}` : ''}
+                      </div>
+                      {e.error ? <div className="mt-1 text-[10px] text-red-600 break-all">{e.error}</div> : null}
+                    </>
+                  )}
                 </div>
               ))
             )}
