@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ShoppingBag, Trash2, Plus, Minus, CreditCard, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Trash2, Plus, Minus, CreditCard, ShieldCheck, CheckCircle2, ImageOff } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import { api } from '@/services/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { useI18n } from '@/lib/i18n';
+import { getProductImage } from '@/lib/productMedia';
 
 interface CheckoutProps {
   onBack: () => void;
@@ -100,24 +101,32 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
             
             {items.length > 0 ? (
               <AnimatePresence mode="popLayout">
-                {items.map((item) => (
-                  <motion.div 
-                    key={item.id}
-                    layout
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    className="flex gap-4 p-4 bg-gray-50 rounded-3xl border border-gray-100"
-                  >
-                    <div className="w-20 h-20 rounded-2xl bg-white overflow-hidden flex-shrink-0 shadow-sm">
-                      <img 
-                        src={`https://picsum.photos/seed/${item.id}/200/200`} 
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                    </div>
-                    <div className="flex-1 flex flex-col justify-between py-0.5">
+                {items.map((item) => {
+                  const productImage = getProductImage(item);
+                  return (
+                    <motion.div 
+                      key={item.id}
+                      layout
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      className="flex gap-4 p-4 bg-gray-50 rounded-3xl border border-gray-100"
+                    >
+                      <div className="w-20 h-20 rounded-2xl bg-white overflow-hidden flex-shrink-0 shadow-sm">
+                        {productImage ? (
+                          <img 
+                            src={productImage}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-white text-primary flex items-center justify-center">
+                            <ImageOff size={16} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 flex flex-col justify-between py-0.5">
                       <div className="flex justify-between items-start">
                         <h3 className="text-sm font-bold text-gray-900 line-clamp-1">{item.name}</h3>
                         <button 
@@ -145,9 +154,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
                           </button>
                         </div>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             ) : (
               <div className="py-12 text-center">

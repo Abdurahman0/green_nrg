@@ -11,7 +11,7 @@ import {
   ShoppingBag,
 } from 'lucide-react';
 import { api } from '@/services/api';
-import { Profile as ProfileType } from '@/types';
+import { BootstrapData, Profile as ProfileType } from '@/types';
 import { Skeleton } from '../ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
@@ -23,13 +23,18 @@ interface ProfileProps {
 export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   const { t, lang, setLang } = useI18n();
   const [profile, setProfile] = useState<ProfileType | null>(null);
+  const [bootstrap, setBootstrap] = useState<BootstrapData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await api.getProfile();
-        setProfile(data);
+        const [profileData, bootstrapData] = await Promise.all([
+          api.getProfile(),
+          api.getBootstrap(),
+        ]);
+        setProfile(profileData);
+        setBootstrap(bootstrapData);
       } catch (error) {
         console.error(error);
       } finally {
@@ -83,15 +88,15 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
 
         <div className="flex gap-4 mt-8 w-full max-w-xs">
           <div className="flex-1 p-4 bg-white rounded-3xl border border-gray-100 shadow-sm">
-            <span className="block text-xl font-black text-gray-900">12</span>
+            <span className="block text-xl font-black text-gray-900">{bootstrap?.order_history.length ?? 0}</span>
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               {t('profile.ordersCount')}
             </span>
           </div>
           <div className="flex-1 p-4 bg-white rounded-3xl border border-gray-100 shadow-sm">
-            <span className="block text-xl font-black text-gray-900">4.8</span>
+            <span className="block text-xl font-black text-gray-900">{bootstrap?.favorites.length ?? 0}</span>
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-              {t('profile.rating')}
+              {t('profile.favorites')}
             </span>
           </div>
         </div>

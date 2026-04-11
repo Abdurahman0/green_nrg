@@ -8,6 +8,8 @@ import { useCart } from '@/lib/CartContext';
 import { useFavorites } from '@/lib/FavoritesContext';
 import { dispatchCartFlyFromElement } from '@/lib/cartFly';
 import { useI18n } from '@/lib/i18n';
+import { getProductImage } from '@/lib/productMedia';
+import { ImageOff } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -26,18 +28,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const cartItem = items.find(item => item.id === product.id);
   const quantity = cartItem?.quantity || 0;
   const isFav = isFavorite(product.id);
-  // Placeholder image based on category or name
-  const getPlaceholderImage = (p: Product) => {
-    const category = p.category__name?.toLowerCase() || '';
-    if (category.includes('solar')) return 'https://picsum.photos/seed/solar/400/400';
-    if (category.includes('storage') || category.includes('battery')) return 'https://picsum.photos/seed/battery/400/400';
-    if (category.includes('inverter')) return 'https://picsum.photos/seed/tech/400/400';
-    if (category.includes('ev')) return 'https://picsum.photos/seed/ev/400/400';
-    return `https://picsum.photos/seed/${p.id}/400/400`;
-  };
+  const productImage = getProductImage(product);
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
-    dispatchCartFlyFromElement(e.currentTarget, getPlaceholderImage(product));
+    dispatchCartFlyFromElement(e.currentTarget, productImage);
     setIsAnimating(true);
     addToCart(product);
     setTimeout(() => setIsAnimating(false), 600);
@@ -45,7 +39,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   const handleIncrement = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    dispatchCartFlyFromElement(e.currentTarget, getPlaceholderImage(product));
+    dispatchCartFlyFromElement(e.currentTarget, productImage);
     updateQuantity(product.id, quantity + 1);
   };
 
@@ -63,13 +57,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     >
       <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300 bg-white group rounded-2xl">
         <div className="relative aspect-square bg-gray-50 overflow-hidden">
-          <img
-            src={getPlaceholderImage(product)}
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            referrerPolicy="no-referrer"
-            onClick={() => onClick?.(product)}
-          />
+          {productImage ? (
+            <img
+              src={productImage}
+              alt={product.name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              referrerPolicy="no-referrer"
+              onClick={() => onClick?.(product)}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => onClick?.(product)}
+              className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-white text-primary flex items-center justify-center"
+            >
+              <div className="flex flex-col items-center gap-2 px-3 text-center">
+                <ImageOff size={20} />
+                <span className="text-[11px] font-semibold">No product image</span>
+              </div>
+            </button>
+          )}
           <button
             onClick={(e) => {
               e.stopPropagation();

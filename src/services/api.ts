@@ -22,10 +22,6 @@ const API_BASE_URL =
   (((import.meta as unknown as { env?: Record<string, string | undefined> }).env
     ?.VITE_API_BASE_URL as string | undefined) ?? ''
   ).trim();
-const DEV_TELEGRAM_INIT_DATA =
-  (((import.meta as unknown as { env?: Record<string, string | undefined> }).env
-    ?.VITE_TELEGRAM_INIT_DATA as string | undefined) ?? ''
-  ).trim();
 const WEBAPP_PREFIX = '/api/integrations/telegram/webapp';
 
 const toNumber = (value: unknown): number => {
@@ -49,7 +45,7 @@ const asRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
 const getTelegramInitData = (): string => {
-  if (typeof window === 'undefined') return DEV_TELEGRAM_INIT_DATA;
+  if (typeof window === 'undefined') return '';
 
   const telegram = (window as Window & {
     Telegram?: { WebApp?: { initData?: string } };
@@ -60,15 +56,16 @@ const getTelegramInitData = (): string => {
   const fromQuery = new URLSearchParams(window.location.search).get('tgWebAppData')?.trim();
   if (fromQuery) return fromQuery;
 
-  return DEV_TELEGRAM_INIT_DATA;
+  return '';
 };
 
 const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
   const headers = new Headers(init?.headers ?? {});
   const initData = getTelegramInitData();
-  if (initData) {
-    headers.set('X-Telegram-Init-Data', initData);
+  if (!initData) {
+    throw new Error('Telegram initData is missing. Open this app inside Telegram WebApp.');
   }
+  headers.set('X-Telegram-Init-Data', initData);
 
   if (init?.body && !(init?.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
@@ -108,6 +105,10 @@ const normalizeProduct = (product: Record<string, unknown>): Product => ({
   price: toNumber(product.price),
   category__name:
     typeof product.category__name === 'string' ? product.category__name : undefined,
+  description: typeof product.description === 'string' ? product.description : undefined,
+  image_url: typeof product.image_url === 'string' ? product.image_url : undefined,
+  primary_image_url:
+    typeof product.primary_image_url === 'string' ? product.primary_image_url : undefined,
 });
 
 const normalizeCategory = (category: Record<string, unknown>): Category => ({

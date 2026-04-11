@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, SlidersHorizontal, LayoutGrid, List } from 'lucide-react';
+import { Search, SlidersHorizontal, LayoutGrid, List, ImageOff } from 'lucide-react';
 import { api } from '@/services/api';
 import { Category, Product } from '@/types';
 import { ProductCard } from '../ProductCard';
@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { dispatchCartFlyFromElement } from '@/lib/cartFly';
 import { useI18n } from '@/lib/i18n';
+import { getProductImage } from '@/lib/productMedia';
 
 interface CatalogProps {
   onProductClick: (product: Product) => void;
@@ -78,15 +79,6 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const getPlaceholderImage = (product: Product) => {
-    const category = product.category__name?.toLowerCase() || '';
-    if (category.includes('solar')) return 'https://picsum.photos/seed/solar/400/400';
-    if (category.includes('storage') || category.includes('battery')) return 'https://picsum.photos/seed/battery/400/400';
-    if (category.includes('inverter')) return 'https://picsum.photos/seed/tech/400/400';
-    if (category.includes('ev')) return 'https://picsum.photos/seed/ev/400/400';
-    return `https://picsum.photos/seed/${product.id}/400/400`;
-  };
 
   return (
     <div className="pb-24">
@@ -168,57 +160,66 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
             viewMode === 'grid' ? "grid-cols-2" : "grid-cols-1"
           )}>
             <AnimatePresence mode="popLayout">
-              {filteredProducts.map((product) => (
-                <motion.div
-                  key={product.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {viewMode === 'grid' ? (
-                    <ProductCard 
-                      product={product} 
-                      onClick={onProductClick}
-                    />
-                  ) : (
-                    <div 
-                      className="flex gap-4 p-3 bg-white rounded-2xl border border-gray-50 shadow-sm hover:shadow-md transition-all cursor-pointer group"
-                      onClick={() => onProductClick(product)}
-                    >
-                      <div className="w-24 h-24 rounded-xl bg-gray-50 overflow-hidden flex-shrink-0">
-                        <img 
-                          src={`https://picsum.photos/seed/${product.id}/200/200`} 
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          referrerPolicy="no-referrer"
-                        />
-                      </div>
-                      <div className="flex flex-col justify-between py-1 flex-1">
-                        <div>
-                          <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{product.category__name}</span>
-                          <h3 className="font-bold text-gray-900 text-sm line-clamp-1 mt-0.5">{product.name}</h3>
+              {filteredProducts.map((product) => {
+                const productImage = getProductImage(product);
+                return (
+                  <motion.div
+                    key={product.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {viewMode === 'grid' ? (
+                      <ProductCard 
+                        product={product} 
+                        onClick={onProductClick}
+                      />
+                    ) : (
+                      <div 
+                        className="flex gap-4 p-3 bg-white rounded-2xl border border-gray-50 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                        onClick={() => onProductClick(product)}
+                      >
+                        <div className="w-24 h-24 rounded-xl bg-gray-50 overflow-hidden flex-shrink-0">
+                          {productImage ? (
+                            <img 
+                              src={productImage} 
+                              alt={product.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-white text-primary flex items-center justify-center">
+                              <ImageOff size={18} />
+                            </div>
+                          )}
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-lg font-black text-primary">${product.price.toLocaleString()}</span>
-                          <Button 
-                            size="sm" 
-                            className="rounded-lg h-8 px-3"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              dispatchCartFlyFromElement(e.currentTarget, getPlaceholderImage(product));
-                              onAddToCart(product);
-                            }}
-                          >
-                            {t('catalog.add')}
-                          </Button>
+                        <div className="flex flex-col justify-between py-1 flex-1">
+                          <div>
+                            <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{product.category__name}</span>
+                            <h3 className="font-bold text-gray-900 text-sm line-clamp-1 mt-0.5">{product.name}</h3>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-lg font-black text-primary">${product.price.toLocaleString()}</span>
+                            <Button 
+                              size="sm" 
+                              className="rounded-lg h-8 px-3"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                dispatchCartFlyFromElement(e.currentTarget, productImage);
+                                onAddToCart(product);
+                              }}
+                            >
+                              {t('catalog.add')}
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </motion.div>
-              ))}
+                    )}
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         ) : (

@@ -27,6 +27,9 @@ export interface Product {
   name: string;
   price: number;
   category__name?: string;
+  description?: string;
+  image_url?: string;
+  primary_image_url?: string;
 }
 
 export interface Order {

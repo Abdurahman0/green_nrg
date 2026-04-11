@@ -97,7 +97,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/75">Green NRG</p>
             <h2 className="mt-1 text-lg font-black text-gray-900">{bootstrap?.customer?.full_name || username}</h2>
             <p className="text-xs text-gray-500">
-              {bootstrap?.customer?.phone || 'Telegram WebApp customer'}
+              {bootstrap?.customer?.phone || '-'}
             </p>
           </div>
           <div className="grid grid-cols-3 gap-2">
