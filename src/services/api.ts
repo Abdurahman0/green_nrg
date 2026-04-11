@@ -3,6 +3,8 @@ import {
   CatalogData,
   Category,
   CategoryDetail,
+  CheckoutPayload,
+  CheckoutResult,
   Favorite,
   Order,
   Product,
@@ -16,14 +18,13 @@ interface ApiEnvelope<T> {
   message?: string;
 }
 
-interface CheckoutItemInput {
-  id: string;
-  quantity: number;
-}
-
 const API_BASE_URL =
   (((import.meta as unknown as { env?: Record<string, string | undefined> }).env
     ?.VITE_API_BASE_URL as string | undefined) ?? ''
+  ).trim();
+const DEV_TELEGRAM_INIT_DATA =
+  (((import.meta as unknown as { env?: Record<string, string | undefined> }).env
+    ?.VITE_TELEGRAM_INIT_DATA as string | undefined) ?? ''
   ).trim();
 const WEBAPP_PREFIX = '/api/integrations/telegram/webapp';
 
@@ -47,15 +48,37 @@ const unwrapData = <T>(payload: unknown): T => {
 const asRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
+const getTelegramInitData = (): string => {
+  if (typeof window === 'undefined') return DEV_TELEGRAM_INIT_DATA;
+
+  const telegram = (window as Window & {
+    Telegram?: { WebApp?: { initData?: string } };
+  }).Telegram;
+  const fromWebApp = telegram?.WebApp?.initData?.trim();
+  if (fromWebApp) return fromWebApp;
+
+  const fromQuery = new URLSearchParams(window.location.search).get('tgWebAppData')?.trim();
+  if (fromQuery) return fromQuery;
+
+  return DEV_TELEGRAM_INIT_DATA;
+};
+
 const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
+  const headers = new Headers(init?.headers ?? {});
+  const initData = getTelegramInitData();
+  if (initData) {
+    headers.set('X-Telegram-Init-Data', initData);
+  }
+
+  if (init?.body && !(init?.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
+  }
+
   const response = await fetch(`${API_BASE_URL}${WEBAPP_PREFIX}${path}`, {
-    method: init?.method ?? 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
-    },
-    credentials: 'include',
     ...init,
+    method: init?.method ?? 'GET',
+    headers,
+    credentials: 'include',
   });
 
   let payload: unknown = null;
@@ -122,23 +145,63 @@ export const api = {
     const raw = await request<unknown>('/bootstrap/');
     const data = asRecord(raw);
     const user = asRecord(data.user);
+    const rawCustomer =
+      data.customer && typeof data.customer === 'object'
+        ? asRecord(data.customer)
+        : null;
+    const rawActiveOrder =
+      data.active_order && typeof data.active_order === 'object'
+        ? asRecord(data.active_order)
+        : null;
+    const rawOrderHistory = Array.isArray(data.order_history) ? data.order_history : [];
+    const rawPendingReviews = Array.isArray(data.pending_reviews) ? data.pending_reviews : [];
+    const rawFavorites = Array.isArray(data.favorites) ? data.favorites : [];
+    const rawPaymentMethods = Array.isArray(data.payment_methods) ? data.payment_methods : [];
+
     return {
       user: {
         id: String(user.id ?? ''),
         username: String(user.username ?? ''),
       },
-      categories_count: toNumber(data.categories_count),
-      products_count: toNumber(data.products_count),
+      customer: rawCustomer
+        ? {
+            id:
+              rawCustomer.id === null || rawCustomer.id === undefined
+                ? null
+                : String(rawCustomer.id),
+            full_name:
+              rawCustomer.full_name === null || rawCustomer.full_name === undefined
+                ? null
+                : String(rawCustomer.full_name),
+            phone:
+              rawCustomer.phone === null || rawCustomer.phone === undefined
+                ? null
+                : String(rawCustomer.phone),
+            address:
+              rawCustomer.address === null || rawCustomer.address === undefined
+                ? null
+                : String(rawCustomer.address),
+          }
+        : null,
+      active_order: rawActiveOrder ? normalizeOrder(rawActiveOrder) : null,
+      order_history: rawOrderHistory.map((item) => normalizeOrder(asRecord(item))),
+      favorites: rawFavorites.map((item) => String(item ?? '')),
+      pending_reviews: rawPendingReviews.map((item) => normalizeOrder(asRecord(item))),
+      payment_methods: rawPaymentMethods.map((item) => String(item ?? '')),
     };
   },
 
   getCatalog: async (): Promise<CatalogData> => {
     const raw = await request<unknown>('/catalog/');
     const data = asRecord(raw);
+    const categoriesRaw = Array.isArray(data.categories) ? data.categories : [];
+    const brandsRaw = Array.isArray(data.brands) ? data.brands : [];
     const productsRaw = Array.isArray(data.products) ? data.products : [];
     const promotedRaw = Array.isArray(data.promoted_products) ? data.promoted_products : [];
 
     return {
+      categories: categoriesRaw.map((item) => normalizeCategory(asRecord(item))),
+      brands: brandsRaw.map((item) => String(item ?? '')),
       products: productsRaw.map((item) => normalizeProduct(item as Record<string, unknown>)),
       promoted_products: promotedRaw.map((item) =>
         normalizeProduct(item as Record<string, unknown>)
@@ -157,10 +220,12 @@ export const api = {
     const raw = await request<unknown>(`/categories/${categoryId}/`);
     const data = asRecord(raw);
     const rawCategory = asRecord(data.category);
+    const brandsRaw = Array.isArray(data.brands) ? data.brands : [];
     const productsRaw = Array.isArray(data.products) ? data.products : [];
 
     return {
       category: normalizeCategory(rawCategory),
+      brands: brandsRaw.map((item) => String(item ?? '')),
       products: productsRaw.map((item) => normalizeProduct(item as Record<string, unknown>)),
     };
   },
@@ -172,21 +237,14 @@ export const api = {
     );
   },
 
-  toggleFavorite: async (payload: { user: string; product: string }): Promise<Favorite[]> => {
-    const data = await request<unknown>('/favorites/', {
+  toggleFavorite: async (payload: { product: string }): Promise<Favorite | null> => {
+    const body = JSON.stringify(payload);
+    const data = await request<unknown>('/favorites/toggle/', {
       method: 'POST',
-      body: JSON.stringify(payload),
+      body,
     });
-
-    if (Array.isArray(data)) {
-      return data.map((item) => normalizeFavorite(item as Record<string, unknown>));
-    }
-
-    if (data && typeof data === 'object') {
-      return [normalizeFavorite(data as Record<string, unknown>)];
-    }
-
-    return [];
+    const objectData = asRecord(data);
+    return Object.keys(objectData).length ? normalizeFavorite(objectData) : null;
   },
 
   getOrders: async (): Promise<Order[]> => {
@@ -214,7 +272,6 @@ export const api = {
   },
 
   addReview: async (review: {
-    user: string;
     contract: string;
     rating: number;
     comment: string;
@@ -231,34 +288,25 @@ export const api = {
     return normalizeReview((data ?? {}) as Record<string, unknown>);
   },
 
-  checkout: async (
-    items: CheckoutItemInput[]
-  ): Promise<{ success: boolean; message: string }> => {
+  checkout: async (payload: CheckoutPayload): Promise<CheckoutResult> => {
     const raw = await request<unknown>('/checkout/', {
       method: 'POST',
       body: JSON.stringify({
-        items: items.map((item) => ({ product: item.id, quantity: item.quantity })),
+        ...payload,
+        items: payload.items.map((item) => ({
+          product: item.id,
+          quantity: item.quantity,
+        })),
       }),
     });
     const data = asRecord(raw);
-
-    const message =
-      typeof data.message === 'string' && data.message.trim()
-        ? data.message
-        : 'Order confirmed successfully.';
-
-    return { success: true, message };
-  },
-
-  patchReview: async (
-    reviewId: string,
-    patch: Partial<Pick<Review, 'rating' | 'comment'>>
-  ): Promise<Review> => {
-    const raw = await request<unknown>(`/reviews/${reviewId}/`, {
-      method: 'PATCH',
-      body: JSON.stringify(patch),
-    });
-    const data = asRecord(raw);
-    return normalizeReview(data);
+    return {
+      contract_id: String(data.contract_id ?? ''),
+      client_id: String(data.client_id ?? ''),
+      message:
+        typeof data.message === 'string' && data.message.trim()
+          ? data.message
+          : 'Order confirmed successfully.',
+    };
   },
 };

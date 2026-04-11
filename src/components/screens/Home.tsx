@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Bell, Star, ShieldCheck, Leaf } from 'lucide-react';
+import { Search, Bell, Star, ShieldCheck, Leaf, PackageCheck, Wallet } from 'lucide-react';
 import { api } from '@/services/api';
 import { BootstrapData, CatalogData, Product, Review } from '@/types';
 import { ProductCard } from '../ProductCard';
@@ -67,6 +67,11 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
 
   const username = bootstrap?.user?.username?.trim() || 'User';
   const userInitial = username.charAt(0).toUpperCase();
+  const featuredProducts =
+    (catalog?.promoted_products?.length ? catalog.promoted_products : catalog?.products) ?? [];
+  const ordersCount = bootstrap?.order_history?.length ?? 0;
+  const favoritesCount = bootstrap?.favorites?.length ?? 0;
+  const paymentMethodsCount = bootstrap?.payment_methods?.length ?? 0;
 
   return (
     <div className="pb-24">
@@ -85,6 +90,41 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
           </div>
         </div>
       </header>
+
+      <section className="px-6 mb-6">
+        <div className="rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/12 via-primary/5 to-white p-5 shadow-sm">
+          <div className="mb-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/75">Green NRG</p>
+            <h2 className="mt-1 text-lg font-black text-gray-900">{bootstrap?.customer?.full_name || username}</h2>
+            <p className="text-xs text-gray-500">
+              {bootstrap?.customer?.phone || 'Telegram WebApp customer'}
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-2xl bg-white p-3 border border-primary/10">
+              <div className="mb-2 inline-flex rounded-xl bg-primary/10 p-2 text-primary">
+                <PackageCheck size={14} />
+              </div>
+              <p className="text-lg font-black text-gray-900">{ordersCount}</p>
+              <p className="text-[10px] uppercase tracking-wider text-gray-500">Orders</p>
+            </div>
+            <div className="rounded-2xl bg-white p-3 border border-primary/10">
+              <div className="mb-2 inline-flex rounded-xl bg-primary/10 p-2 text-primary">
+                <Star size={14} />
+              </div>
+              <p className="text-lg font-black text-gray-900">{favoritesCount}</p>
+              <p className="text-[10px] uppercase tracking-wider text-gray-500">Saved</p>
+            </div>
+            <div className="rounded-2xl bg-white p-3 border border-primary/10">
+              <div className="mb-2 inline-flex rounded-xl bg-primary/10 p-2 text-primary">
+                <Wallet size={14} />
+              </div>
+              <p className="text-lg font-black text-gray-900">{paymentMethodsCount}</p>
+              <p className="text-[10px] uppercase tracking-wider text-gray-500">Payments</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Search Bar */}
       <div className="px-6 mb-8">
@@ -125,7 +165,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
           </Button>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          {catalog?.products.slice(0, 4).map((product) => (
+          {featuredProducts.slice(0, 4).map((product) => (
             <ProductCard 
               key={product.id} 
               product={product} 

@@ -3,6 +3,13 @@ export interface User {
   username: string;
 }
 
+export interface CustomerProfile {
+  id: string | null;
+  full_name: string | null;
+  phone: string | null;
+  address: string | null;
+}
+
 export interface Profile {
   id: string;
   username: string;
@@ -48,16 +55,43 @@ export interface Favorite {
 
 export interface BootstrapData {
   user: User;
-  categories_count: number;
-  products_count: number;
+  customer: CustomerProfile | null;
+  active_order: Order | null;
+  order_history: Order[];
+  favorites: string[];
+  pending_reviews: Order[];
+  payment_methods: string[];
 }
 
 export interface CatalogData {
+  categories: Category[];
+  brands: string[];
   products: Product[];
   promoted_products: Product[];
 }
 
 export interface CategoryDetail {
   category: Category;
+  brands: string[];
   products: Product[];
+}
+
+export interface CheckoutItemInput {
+  id: string;
+  quantity: number;
+}
+
+export interface CheckoutPayload {
+  full_name?: string;
+  phone?: string;
+  fulfillment_method?: 'pickup' | 'delivery';
+  address?: string;
+  payment_method?: string;
+  items: CheckoutItemInput[];
+}
+
+export interface CheckoutResult {
+  contract_id: string;
+  client_id: string;
+  message: string;
 }

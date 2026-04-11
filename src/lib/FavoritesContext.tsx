@@ -11,7 +11,6 @@ const FavoritesContext = createContext<FavoritesContextType | undefined>(undefin
 
 export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -24,8 +23,9 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         ]);
         if (!isMounted) return;
 
-        setUserId(bootstrap.user.id);
-        setFavorites(new Set(favoriteRows.map((row) => row.product)));
+        const fromRows = favoriteRows.map((row) => row.product);
+        const source = fromRows.length > 0 ? fromRows : bootstrap.favorites;
+        setFavorites(new Set(source));
       } catch (error) {
         console.error(error);
       }
@@ -54,17 +54,9 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     try {
-      const resolvedUserId = userId ?? (await api.getBootstrap()).user.id;
-      if (!userId) setUserId(resolvedUserId);
-
-      const response = await api.toggleFavorite({
-        user: resolvedUserId,
-        product: productId,
-      });
-
-      if (response.length > 1) {
-        setFavorites(new Set(response.map((row) => row.product)));
-      }
+      await api.toggleFavorite({ product: productId });
+      const favoriteRows = await api.getFavorites();
+      setFavorites(new Set(favoriteRows.map((row) => row.product)));
     } catch (error) {
       console.error(error);
       setFavorites((prev) => {

@@ -18,16 +18,25 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [step, setStep] = useState<'cart' | 'success'>('cart');
   const [orderRef, setOrderRef] = useState<string>('');
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [fulfillmentMethod, setFulfillmentMethod] = useState<'delivery' | 'pickup'>('delivery');
 
   const handleCheckout = async () => {
     setIsProcessing(true);
     try {
-      const response = await api.checkout(items);
-      if (response.success) {
-        setOrderRef(response.message);
-        setStep('success');
-        clearCart();
-      }
+      const response = await api.checkout({
+        full_name: fullName || undefined,
+        phone: phone || undefined,
+        address: fulfillmentMethod === 'delivery' ? address || undefined : undefined,
+        fulfillment_method: fulfillmentMethod,
+        payment_method: 'telegram',
+        items,
+      });
+      setOrderRef(response.contract_id || response.message);
+      setStep('success');
+      clearCart();
     } catch (error) {
       console.error(error);
     } finally {
@@ -152,6 +161,55 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
           </div>
 
           {/* Payment Method Placeholder */}
+          <div className="space-y-3">
+            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Contact Details</h2>
+            <div className="p-4 bg-white rounded-3xl border border-gray-100 space-y-3">
+              <input
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Full name"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/20"
+              />
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Phone number"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/20"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setFulfillmentMethod('delivery')}
+                  className={`rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
+                    fulfillmentMethod === 'delivery'
+                      ? 'border-primary bg-primary text-white'
+                      : 'border-gray-200 bg-white text-gray-500'
+                  }`}
+                >
+                  Delivery
+                </button>
+                <button
+                  onClick={() => setFulfillmentMethod('pickup')}
+                  className={`rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
+                    fulfillmentMethod === 'pickup'
+                      ? 'border-primary bg-primary text-white'
+                      : 'border-gray-200 bg-white text-gray-500'
+                  }`}
+                >
+                  Pickup
+                </button>
+              </div>
+              {fulfillmentMethod === 'delivery' && (
+                <textarea
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Delivery address"
+                  rows={3}
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/20"
+                />
+              )}
+            </div>
+          </div>
+
           <div className="space-y-4">
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">{t('checkout.paymentMethod')}</h2>
             <div className="p-5 bg-white rounded-3xl border-2 border-primary flex items-center justify-between shadow-sm">
