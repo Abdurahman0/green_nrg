@@ -112,13 +112,18 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
   }
 
   let payload: unknown = null;
+  let rawText = '';
   try {
-    payload = await response.json();
+    rawText = await response.text();
+    payload = rawText ? JSON.parse(rawText) : null;
   } catch {
     payload = null;
   }
 
   if (!response.ok) {
+    const snippet = rawText
+      ? rawText.slice(0, 220).replace(/\s+/g, ' ').trim()
+      : '';
     debugStore.push({
       id: makeId(),
       ts: Date.now(),
@@ -129,6 +134,7 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
       status: response.status,
       ok: false,
       initDataLength: initData.length,
+      error: snippet ? `HTTP ${response.status}: ${snippet}` : `HTTP ${response.status}`,
     });
     const message =
       (payload &&
