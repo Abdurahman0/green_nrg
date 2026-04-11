@@ -22,7 +22,8 @@ interface ApiEnvelope<T> {
 }
 
 const API_BASE_URL = getApiBaseUrl();
-const WEBAPP_PREFIX = '/api/integrations/telegram/webapp';
+// Use same-origin proxy on Vercel to avoid CORS from webviews.
+const WEBAPP_PREFIX = '/api/telegram-webapp';
 
 const toNumber = (value: unknown): number => {
   if (typeof value === 'number') return value;

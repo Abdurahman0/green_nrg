@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/api/telegram-webapp", "destination": "/api/telegram-webapp" },
+    { "source": "/api/telegram-webapp/(.*)", "destination": "/api/telegram-webapp?path=$1" }
+  ]
+}
+

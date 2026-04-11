@@ -10,7 +10,6 @@ export const getApiBaseUrl = (): string => {
   const fromEnv = readEnv('VITE_API_BASE_URL');
   if (fromEnv) return stripTrailingSlash(fromEnv);
 
-  // Default to the known backend host.
-  return 'https://solar.api.cognilabs.org';
+  // Default to same-origin (Vercel proxy) to avoid CORS.
+  return '';
 };
-
