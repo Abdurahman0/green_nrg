@@ -139,6 +139,11 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
     const message =
       (payload &&
         typeof payload === 'object' &&
+        'detail' in payload &&
+        typeof (payload as { detail?: unknown }).detail === 'string' &&
+        (payload as { detail: string }).detail) ||
+      (payload &&
+        typeof payload === 'object' &&
         'message' in payload &&
         typeof (payload as { message?: unknown }).message === 'string' &&
         (payload as { message: string }).message) ||
