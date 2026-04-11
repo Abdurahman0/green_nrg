@@ -4,6 +4,7 @@ import { getTelegramDebugSnapshot } from '@/lib/telegramWebApp';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useDebug } from '@/lib/DebugContext';
+import { getApiBaseUrl } from '@/config';
 
 export const DebugPanel: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -38,9 +39,11 @@ export const DebugPanel: React.FC = () => {
 
   if (!enabled) return null;
 
-  const apiBase =
+  const apiBaseEnv =
     (((import.meta as unknown as { env?: Record<string, string | undefined> }).env
       ?.VITE_API_BASE_URL as string | undefined) ?? '').trim();
+  const apiBaseEffective = getApiBaseUrl();
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
   return (
     <>
@@ -86,7 +89,13 @@ export const DebugPanel: React.FC = () => {
             </div>
 
             <div className="mt-2 text-[10px] text-gray-400 break-all">
-              API: {apiBase || '(empty)'}
+              Origin: {origin}
+            </div>
+            <div className="mt-1 text-[10px] text-gray-400 break-all">
+              API env: {apiBaseEnv || '(empty)'}
+            </div>
+            <div className="mt-1 text-[10px] text-gray-400 break-all">
+              API effective: {apiBaseEffective}
             </div>
             <div className="mt-1 text-[10px] text-gray-400 break-all">
               {snapshot.search} {snapshot.hash}

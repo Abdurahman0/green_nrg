@@ -13,6 +13,7 @@ import {
 } from '../types';
 import { waitForTelegramInitData } from '@/lib/telegramWebApp';
 import { debugStore, makeId } from '@/lib/debugStore';
+import { getApiBaseUrl } from '@/config';
 
 interface ApiEnvelope<T> {
   status: string;
@@ -20,10 +21,7 @@ interface ApiEnvelope<T> {
   message?: string;
 }
 
-const API_BASE_URL =
-  (((import.meta as unknown as { env?: Record<string, string | undefined> }).env
-    ?.VITE_API_BASE_URL as string | undefined) ?? ''
-  ).trim();
+const API_BASE_URL = getApiBaseUrl();
 const WEBAPP_PREFIX = '/api/integrations/telegram/webapp';
 
 const toNumber = (value: unknown): number => {
