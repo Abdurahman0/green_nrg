@@ -32,25 +32,19 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
               key={item.id}
               onClick={() => onTabChange(item.id as TabType)}
               className={cn(
-                "flex flex-col items-center justify-center flex-1 relative",
+                "flex flex-col items-center justify-center flex-1 h-full",
                 isActive ? "text-primary" : "text-gray-400"
               )}
             >
-              <div className={cn(
-                "p-1 rounded-xl",
-                isActive && "bg-primary/10"
-              )}>
-                <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+              <div className="h-6 w-6 flex items-center justify-center">
+                <Icon size={22} strokeWidth={2} />
               </div>
               <span className={cn(
-                "text-[10px] font-medium mt-1",
+                "text-[10px] font-medium mt-1 leading-none",
                 isActive ? "opacity-100" : "opacity-70"
               )}>
                 {item.label}
               </span>
-              {isActive && (
-                <div className="absolute -top-1 w-1 h-1 bg-primary rounded-full" />
-              )}
             </button>
           );
         })}

@@ -26,6 +26,11 @@ import { ShoppingCart } from 'lucide-react';
 import { Badge } from './components/ui/badge';
 import { CART_FLY_EVENT, CartFlyDetail } from './lib/cartFly';
 import { I18nProvider } from './lib/i18n';
+import {
+  ensureTelegramWebAppScript,
+  getTelegramInitData,
+  initializeTelegramWebApp,
+} from './lib/telegramWebApp';
 
 interface CartFlyItem {
   id: number;
@@ -44,6 +49,27 @@ function AppContent() {
   const [cartFlyItems, setCartFlyItems] = useState<CartFlyItem[]>([]);
   const cartButtonRef = useRef<HTMLButtonElement | null>(null);
   const { totalItems, addToCart } = useCart();
+
+  useEffect(() => {
+    let timer: number | null = null;
+    let attempts = 0;
+    const tryBootstrapTelegram = () => {
+      ensureTelegramWebAppScript();
+      initializeTelegramWebApp();
+      attempts += 1;
+      if ((getTelegramInitData() || attempts >= 10) && timer !== null) {
+        window.clearInterval(timer);
+        timer = null;
+      }
+    };
+    tryBootstrapTelegram();
+    timer = window.setInterval(tryBootstrapTelegram, 300);
+    return () => {
+      if (timer !== null) {
+        window.clearInterval(timer);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     // Simulate app initialization

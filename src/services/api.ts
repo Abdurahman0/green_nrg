@@ -11,6 +11,7 @@ import {
   Profile,
   Review,
 } from '../types';
+import { waitForTelegramInitData } from '@/lib/telegramWebApp';
 
 interface ApiEnvelope<T> {
   status: string;
@@ -44,28 +45,14 @@ const unwrapData = <T>(payload: unknown): T => {
 const asRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
-const getTelegramInitData = (): string => {
-  if (typeof window === 'undefined') return '';
-
-  const telegram = (window as Window & {
-    Telegram?: { WebApp?: { initData?: string } };
-  }).Telegram;
-  const fromWebApp = telegram?.WebApp?.initData?.trim();
-  if (fromWebApp) return fromWebApp;
-
-  const fromQuery = new URLSearchParams(window.location.search).get('tgWebAppData')?.trim();
-  if (fromQuery) return fromQuery;
-
-  return '';
-};
-
 const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
   const headers = new Headers(init?.headers ?? {});
-  const initData = getTelegramInitData();
+  const initData = await waitForTelegramInitData();
   if (!initData) {
     throw new Error('Telegram initData is missing. Open this app inside Telegram WebApp.');
   }
   headers.set('X-Telegram-Init-Data', initData);
+  headers.set('Authorization', `tma ${initData}`);
 
   if (init?.body && !(init?.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
