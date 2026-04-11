@@ -12,6 +12,7 @@ import {
   Review,
 } from '../types';
 import { waitForTelegramInitData } from '@/lib/telegramWebApp';
+import { debugStore, makeId } from '@/lib/debugStore';
 
 interface ApiEnvelope<T> {
   status: string;
@@ -49,6 +50,16 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
   const headers = new Headers(init?.headers ?? {});
   const initData = await waitForTelegramInitData();
   if (!initData) {
+    debugStore.push({
+      id: makeId(),
+      ts: Date.now(),
+      kind: 'http',
+      phase: 'error',
+      method: init?.method ?? 'GET',
+      url: `${API_BASE_URL}${WEBAPP_PREFIX}${path}`,
+      error: 'Telegram initData missing',
+      initDataLength: 0,
+    });
     throw new Error('Telegram initData is missing. Open this app inside Telegram WebApp.');
   }
   headers.set('X-Telegram-Init-Data', initData);
@@ -58,12 +69,39 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
     headers.set('Content-Type', 'application/json');
   }
 
-  const response = await fetch(`${API_BASE_URL}${WEBAPP_PREFIX}${path}`, {
-    ...init,
+  const url = `${API_BASE_URL}${WEBAPP_PREFIX}${path}`;
+  const requestId = makeId();
+  debugStore.push({
+    id: requestId,
+    ts: Date.now(),
+    kind: 'http',
+    phase: 'start',
     method: init?.method ?? 'GET',
-    headers,
-    credentials: 'include',
+    url,
+    initDataLength: initData.length,
   });
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...init,
+      method: init?.method ?? 'GET',
+      headers,
+      credentials: 'include',
+    });
+  } catch (err) {
+    debugStore.push({
+      id: makeId(),
+      ts: Date.now(),
+      kind: 'http',
+      phase: 'error',
+      method: init?.method ?? 'GET',
+      url,
+      error: err instanceof Error ? err.message : String(err),
+      initDataLength: initData.length,
+    });
+    throw err;
+  }
 
   let payload: unknown = null;
   try {
@@ -73,6 +111,17 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
   }
 
   if (!response.ok) {
+    debugStore.push({
+      id: makeId(),
+      ts: Date.now(),
+      kind: 'http',
+      phase: 'end',
+      method: init?.method ?? 'GET',
+      url,
+      status: response.status,
+      ok: false,
+      initDataLength: initData.length,
+    });
     const message =
       (payload &&
         typeof payload === 'object' &&
@@ -82,6 +131,18 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
       `Request failed: ${response.status}`;
     throw new Error(message);
   }
+
+  debugStore.push({
+    id: makeId(),
+    ts: Date.now(),
+    kind: 'http',
+    phase: 'end',
+    method: init?.method ?? 'GET',
+    url,
+    status: response.status,
+    ok: true,
+    initDataLength: initData.length,
+  });
 
   return unwrapData<T>(payload);
 };

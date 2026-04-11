@@ -15,6 +15,7 @@ import { BootstrapData, Profile as ProfileType } from '@/types';
 import { Skeleton } from '../ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
+import { useDebug } from '@/lib/DebugContext';
 
 interface ProfileProps {
   onNavigate: (tab: any) => void;
@@ -22,6 +23,7 @@ interface ProfileProps {
 
 export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   const { t, lang, setLang } = useI18n();
+  const { enabled: debugEnabled, setEnabled: setDebugEnabled } = useDebug();
   const [profile, setProfile] = useState<ProfileType | null>(null);
   const [bootstrap, setBootstrap] = useState<BootstrapData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -169,6 +171,15 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
           Green NRG Energy Solutions
         </p>
         <p className="text-[10px] text-gray-300 mt-1">v1.0.4 Premium WebApp</p>
+        <button
+          type="button"
+          onClick={() => {
+            setDebugEnabled(!debugEnabled);
+          }}
+          className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70 hover:text-primary"
+        >
+          {debugEnabled ? 'Hide debug' : 'Show debug'}
+        </button>
       </div>
     </div>
   );

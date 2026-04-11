@@ -26,6 +26,8 @@ import { ShoppingCart } from 'lucide-react';
 import { Badge } from './components/ui/badge';
 import { CART_FLY_EVENT, CartFlyDetail } from './lib/cartFly';
 import { I18nProvider } from './lib/i18n';
+import { DebugPanel } from './components/DebugPanel';
+import { DebugProvider } from './lib/DebugContext';
 import {
   ensureTelegramWebAppScript,
   getTelegramInitData,
@@ -147,6 +149,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-white font-sans selection:bg-primary/20">
+      <DebugPanel />
       <AnimatePresence>
         {isAppLoading && <SplashScreen />}
       </AnimatePresence>
@@ -238,11 +241,13 @@ function AppContent() {
 export default function App() {
   return (
     <I18nProvider>
-      <CartProvider>
-        <FavoritesProvider>
-          <AppContent />
-        </FavoritesProvider>
-      </CartProvider>
+      <DebugProvider>
+        <CartProvider>
+          <FavoritesProvider>
+            <AppContent />
+          </FavoritesProvider>
+        </CartProvider>
+      </DebugProvider>
     </I18nProvider>
   );
 }

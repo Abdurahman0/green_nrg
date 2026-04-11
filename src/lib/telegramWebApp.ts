@@ -98,6 +98,55 @@ export const getTelegramInitData = (): string => {
   return getSessionItem(TELEGRAM_INIT_DATA_CACHE_KEY).trim();
 };
 
+export type TelegramDebugSnapshot = {
+  hasWindow: boolean;
+  hasTelegramObject: boolean;
+  hasWebAppObject: boolean;
+  initDataLength: number;
+  initDataSource: 'webapp' | 'url' | 'cache' | 'none';
+  search: string;
+  hash: string;
+};
+
+export const getTelegramDebugSnapshot = (): TelegramDebugSnapshot => {
+  if (typeof window === 'undefined') {
+    return {
+      hasWindow: false,
+      hasTelegramObject: false,
+      hasWebAppObject: false,
+      initDataLength: 0,
+      initDataSource: 'none',
+      search: '',
+      hash: '',
+    };
+  }
+
+  const webApp = getTelegramWebApp();
+  const fromWebApp = webApp?.initData?.trim() ?? '';
+  const fromUrl = readInitDataFromUrl().trim();
+  const fromCache = getSessionItem(TELEGRAM_INIT_DATA_CACHE_KEY).trim();
+
+  const source: TelegramDebugSnapshot['initDataSource'] = fromWebApp
+    ? 'webapp'
+    : fromUrl
+      ? 'url'
+      : fromCache
+        ? 'cache'
+        : 'none';
+
+  const activeValue = fromWebApp || fromUrl || fromCache;
+
+  return {
+    hasWindow: true,
+    hasTelegramObject: Boolean((window as any).Telegram),
+    hasWebAppObject: Boolean(webApp),
+    initDataLength: activeValue.length,
+    initDataSource: source,
+    search: window.location.search,
+    hash: window.location.hash,
+  };
+};
+
 export const waitForTelegramInitData = async (
   timeoutMs = 5000,
   pollMs = 150

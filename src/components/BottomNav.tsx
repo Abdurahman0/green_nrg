@@ -32,7 +32,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
               key={item.id}
               onClick={() => onTabChange(item.id as TabType)}
               className={cn(
-                "flex flex-col items-center justify-center flex-1 h-full",
+                // Fixed sizing to avoid any perceived shifting when labels differ in length.
+                // Also suppress focus/tap highlight that can look like resizing in mobile webviews.
+                "flex flex-col items-center justify-center flex-1 h-full min-w-0 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]",
                 isActive ? "text-primary" : "text-gray-400"
               )}
             >
@@ -40,7 +42,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
                 <Icon size={22} strokeWidth={2} />
               </div>
               <span className={cn(
-                "text-[10px] font-medium mt-1 leading-none",
+                // Prevent wrap (Orders/Profile are longer) so height never changes.
+                "w-full px-1 text-center text-[10px] font-medium mt-1 leading-none whitespace-nowrap truncate",
                 isActive ? "opacity-100" : "opacity-70"
               )}>
                 {item.label}
