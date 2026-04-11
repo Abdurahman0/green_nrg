@@ -27,18 +27,19 @@ export default async function handler(req: any, res: any) {
   const qs = url.searchParams.toString();
   if (qs) upstreamUrl.search = qs;
 
-  const initData =
-    req.headers['x-telegram-init-data'] ||
-    req.headers['X-Telegram-Init-Data'] ||
-    req.headers['authorization'] ||
-    '';
+  const initDataFromHeader = req.headers['x-telegram-init-data'] || '';
+  const authHeader = req.headers['authorization'] || '';
+  const initDataFromAuth = String(authHeader).toLowerCase().startsWith('tma ')
+    ? String(authHeader).slice(4)
+    : '';
+  const initData = String(initDataFromHeader || initDataFromAuth || '');
 
   const headers: Record<string, string> = {};
   const contentType = req.headers['content-type'];
   if (contentType) headers['Content-Type'] = String(contentType);
   if (initData) {
-    headers['X-Telegram-Init-Data'] = String(initData).replace(/^tma\s+/i, '');
-    headers['Authorization'] = `tma ${headers['X-Telegram-Init-Data']}`;
+    // Backend schema expects this header; avoid sending Authorization to prevent auth-middleware confusion.
+    headers['X-Telegram-Init-Data'] = initData.trim();
   }
 
   const body = await readBody(req);
@@ -67,4 +68,3 @@ export default async function handler(req: any, res: any) {
   res.setHeader('Content-Type', upstreamResp.headers.get('content-type') || 'application/json');
   res.end(text);
 }
-

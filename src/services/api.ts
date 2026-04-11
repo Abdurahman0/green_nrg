@@ -72,7 +72,6 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
     throw new Error('Telegram initData is missing. Open this app inside Telegram WebApp.');
   }
   headers.set('X-Telegram-Init-Data', initData);
-  headers.set('Authorization', `tma ${initData}`);
 
   if (init?.body && !(init?.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');

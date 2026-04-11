@@ -95,7 +95,7 @@ export const DebugPanel: React.FC = () => {
               API env: {apiBaseEnv || '(empty)'}
             </div>
             <div className="mt-1 text-[10px] text-gray-400 break-all">
-              API effective: {apiBaseEffective}
+              API effective: {apiBaseEffective || '(same-origin)'}
             </div>
             <div className="mt-1 text-[10px] text-gray-400 break-all">
               {snapshot.search} {snapshot.hash}
