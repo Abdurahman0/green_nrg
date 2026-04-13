@@ -3,7 +3,6 @@ import { Heart, Plus, Minus } from 'lucide-react';
 import { Product } from '../types';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
-import { motion } from 'motion/react';
 import { useCart } from '@/lib/CartContext';
 import { useFavorites } from '@/lib/FavoritesContext';
 import { dispatchCartFlyFromElement } from '@/lib/cartFly';
@@ -51,17 +50,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2 }}
-    >
-      <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300 bg-white group rounded-2xl">
+    <div className="transform-gpu transition-transform duration-150 hover:-translate-y-1">
+      <Card className="overflow-hidden border border-gray-100 shadow-sm bg-white group rounded-2xl">
         <div className="relative aspect-square bg-gray-50 overflow-hidden">
           {productImage ? (
             <img
               src={productImage}
               alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              className="w-full h-full object-cover transform-gpu transition-transform duration-300 group-hover:scale-[1.03]"
               referrerPolicy="no-referrer"
               onClick={() => onClick?.(product)}
             />
@@ -82,19 +78,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               e.stopPropagation();
               toggleFavorite(product.id);
             }}
-            className="absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-all duration-300 bg-white/80 text-gray-400 hover:text-red-500"
+            className="absolute top-3 right-3 p-2 rounded-full bg-white/90 text-gray-500 hover:text-red-500 active:scale-95 transition-transform"
           >
-            <motion.div
-              animate={{ scale: isFav ? [1, 1.3, 1] : 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Heart size={18} fill={isFav ? "#ef4444" : "none"} stroke={isFav ? "#ef4444" : "currentColor"} color={isFav ? "#ef4444" : "currentColor"} />
-            </motion.div>
+            <Heart
+              size={18}
+              fill={isFav ? '#ef4444' : 'none'}
+              stroke={isFav ? '#ef4444' : 'currentColor'}
+              color={isFav ? '#ef4444' : 'currentColor'}
+            />
           </button>
           
           {product.category__name && (
             <div className="absolute bottom-3 left-3">
-              <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-white/90 text-primary rounded-md backdrop-blur-sm">
+              <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-white/90 text-primary rounded-md">
                 {product.category__name}
               </span>
             </div>
@@ -119,10 +115,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
             <div className="mt-2 h-10 flex items-center justify-end">
               {quantity > 0 ? (
-                <motion.div
-                  layout
-                  className="flex shrink-0 items-center gap-1 rounded-lg bg-primary/10 px-2 py-1"
-                >
+                <div className="flex shrink-0 items-center gap-1 rounded-lg bg-primary/10 px-2 py-1">
                   <Button
                     size="icon"
                     variant="ghost"
@@ -131,15 +124,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   >
                     <Minus size={14} />
                   </Button>
-                  <motion.div
-                    key={quantity}
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.2 }}
-                    className="w-6 text-center font-bold text-primary text-sm"
-                  >
+                  <div className="w-6 text-center font-bold text-primary text-sm tabular-nums">
                     {quantity}
-                  </motion.div>
+                  </div>
                   <Button
                     size="icon"
                     variant="ghost"
@@ -148,17 +135,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   >
                     <Plus size={14} />
                   </Button>
-                </motion.div>
+                </div>
               ) : (
-                <motion.div
-                  initial={{ scale: 0.9 }}
-                  animate={{ scale: isAnimating ? [1, 0.8, 1] : 1 }}
-                  transition={{ duration: 0.4 }}
-                  className="shrink-0"
-                >
+                <div className="shrink-0">
                   <Button
                     size="icon"
-                    className="rounded-xl h-10 w-10 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300"
+                    className={[
+                      "rounded-xl h-10 w-10 shadow-md shadow-primary/10 transition-transform",
+                      isAnimating ? "scale-95" : "scale-100",
+                      "active:scale-95"
+                    ].join(' ')}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleAddToCart(e);
@@ -166,12 +152,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   >
                     <Plus size={20} />
                   </Button>
-                </motion.div>
+                </div>
               )}
             </div>
           </div>
         </div>
       </Card>
-    </motion.div>
+    </div>
   );
 };

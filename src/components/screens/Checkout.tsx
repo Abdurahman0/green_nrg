@@ -80,7 +80,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-[110] bg-white flex flex-col">
+    <div className="fixed inset-0 z-[110] bg-white flex flex-col min-h-0">
       {/* Header */}
       <header className="p-6 flex items-center justify-between bg-white border-b border-gray-50">
         <button onClick={onBack} className="p-2 -ml-2 text-gray-900">
@@ -90,7 +90,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
         <div className="w-10" /> {/* Spacer */}
       </header>
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 min-h-0">
         <div className="p-6 space-y-8">
           {/* Cart Items */}
           <div className="space-y-4">

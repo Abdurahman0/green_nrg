@@ -6,7 +6,6 @@ import { ProductCard } from '../ProductCard';
 import { Skeleton } from '../ui/skeleton';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'motion/react';
 import { dispatchCartFlyFromElement } from '@/lib/cartFly';
 import { useI18n } from '@/lib/i18n';
 import { getProductImage } from '@/lib/productMedia';
@@ -159,68 +158,62 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
             "grid gap-4",
             viewMode === 'grid' ? "grid-cols-2" : "grid-cols-1"
           )}>
-            <AnimatePresence mode="popLayout">
-              {filteredProducts.map((product) => {
-                const productImage = getProductImage(product);
-                return (
-                  <motion.div
-                    key={product.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {viewMode === 'grid' ? (
-                      <ProductCard 
-                        product={product} 
-                        onClick={onProductClick}
+            {filteredProducts.map((product) => {
+              const productImage = getProductImage(product);
+
+              return viewMode === 'grid' ? (
+                <div key={product.id} className="animate-in fade-in duration-200">
+                  <ProductCard product={product} onClick={onProductClick} />
+                </div>
+              ) : (
+                <div
+                  key={product.id}
+                  className="flex gap-4 p-3 bg-white rounded-2xl border border-gray-50 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                  onClick={() => onProductClick(product)}
+                >
+                  <div className="w-24 h-24 rounded-xl bg-gray-50 overflow-hidden flex-shrink-0">
+                    {productImage ? (
+                      <img
+                        src={productImage}
+                        alt={product.name}
+                        className="w-full h-full object-cover transform-gpu group-hover:scale-[1.03] transition-transform duration-300"
+                        referrerPolicy="no-referrer"
                       />
                     ) : (
-                      <div 
-                        className="flex gap-4 p-3 bg-white rounded-2xl border border-gray-50 shadow-sm hover:shadow-md transition-all cursor-pointer group"
-                        onClick={() => onProductClick(product)}
-                      >
-                        <div className="w-24 h-24 rounded-xl bg-gray-50 overflow-hidden flex-shrink-0">
-                          {productImage ? (
-                            <img 
-                              src={productImage} 
-                              alt={product.name}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                              referrerPolicy="no-referrer"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-white text-primary flex items-center justify-center">
-                              <ImageOff size={18} />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex flex-col justify-between py-1 flex-1">
-                          <div>
-                            <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{product.category__name}</span>
-                            <h3 className="font-bold text-gray-900 text-sm line-clamp-1 mt-0.5">{product.name}</h3>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-lg font-black text-primary">${product.price.toLocaleString()}</span>
-                            <Button 
-                              size="sm" 
-                              className="rounded-lg h-8 px-3"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                dispatchCartFlyFromElement(e.currentTarget, productImage);
-                                onAddToCart(product);
-                              }}
-                            >
-                              {t('catalog.add')}
-                            </Button>
-                          </div>
-                        </div>
+                      <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-white text-primary flex items-center justify-center">
+                        <ImageOff size={18} />
                       </div>
                     )}
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+                  </div>
+                  <div className="flex flex-col justify-between py-1 flex-1 min-w-0">
+                    <div>
+                      <span className="text-[10px] font-bold text-primary uppercase tracking-widest">
+                        {product.category__name}
+                      </span>
+                      <h3 className="font-bold text-gray-900 text-sm line-clamp-1 mt-0.5">
+                        {product.name}
+                      </h3>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-black text-primary">
+                        ${product.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </span>
+                      <Button
+                        size="sm"
+                        className="rounded-lg h-8 px-3"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          dispatchCartFlyFromElement(e.currentTarget, productImage);
+                          onAddToCart(product);
+                        }}
+                      >
+                        {t('catalog.add')}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">

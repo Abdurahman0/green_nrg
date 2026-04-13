@@ -30,7 +30,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 z-[100] bg-white flex flex-col"
+      className="fixed inset-0 z-[100] bg-white flex flex-col min-h-0"
     >
       {/* Header Actions */}
       <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10">
@@ -55,7 +55,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
         </div>
       </div>
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 min-h-0">
         {/* Hero Image */}
         <div className="relative aspect-square bg-gray-50">
           {productImage ? (

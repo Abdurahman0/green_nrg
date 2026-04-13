@@ -148,13 +148,13 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans selection:bg-primary/20">
+    <div className="h-[var(--tg-viewport-stable-height)] bg-white font-sans selection:bg-primary/20 overflow-hidden">
       <DebugPanel />
       <AnimatePresence>
         {isAppLoading && <SplashScreen />}
       </AnimatePresence>
 
-      <main className="max-w-lg mx-auto min-h-screen relative">
+      <main className="max-w-lg mx-auto h-full overflow-y-auto overscroll-contain relative">
         <div className="pointer-events-none fixed inset-0 z-70">
           <AnimatePresence>
             {cartFlyItems.map((item) => (

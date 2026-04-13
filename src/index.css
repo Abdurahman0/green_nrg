@@ -42,9 +42,16 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* Use an internal scroll container for more reliable behavior in Telegram WebView. */
+    overflow: hidden;
   }
 }
 

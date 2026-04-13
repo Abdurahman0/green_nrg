@@ -91,7 +91,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
   }
 
   const username = bootstrap?.user?.username?.trim() || 'User';
-  const userInitial = username.charAt(0).toUpperCase();
+  const displayName = bootstrap?.customer?.full_name?.trim() || username;
+  const phone = bootstrap?.customer?.phone?.trim();
+  const userInitial = displayName.charAt(0).toUpperCase();
   const featuredProducts =
     (catalog?.promoted_products?.length ? catalog.promoted_products : catalog?.products) ?? [];
   const ordersCount = bootstrap?.order_history?.length ?? 0;
@@ -117,35 +119,48 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
       </header>
 
       <section className="px-6 mb-6">
-        <div className="rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/12 via-primary/5 to-white p-5 shadow-sm">
-          <div className="mb-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/75">Green NRG</p>
-            <h2 className="mt-1 text-lg font-black text-gray-900">{bootstrap?.customer?.full_name || username}</h2>
-            <p className="text-xs text-gray-500">
-              {bootstrap?.customer?.phone || '-'}
-            </p>
+        <div className="rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/10 via-white to-white p-5 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-primary/70">
+                Green NRG
+              </p>
+              <h2 className="mt-1 text-xl font-black text-gray-900 truncate">{displayName}</h2>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                {displayName !== username ? (
+                  <span className="font-semibold text-primary/80">@{username}</span>
+                ) : null}
+                {phone ? <span className="font-medium">{phone}</span> : null}
+              </div>
+            </div>
+            <div className="shrink-0">
+              <div className="h-11 w-11 rounded-2xl bg-white border border-primary/10 shadow-sm flex items-center justify-center text-primary font-black">
+                {userInitial}
+              </div>
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+
+          <div className="mt-4 grid grid-cols-3 gap-2">
             <div className="rounded-2xl bg-white p-3 border border-primary/10">
               <div className="mb-2 inline-flex rounded-xl bg-primary/10 p-2 text-primary">
                 <PackageCheck size={14} />
               </div>
-              <p className="text-lg font-black text-gray-900">{ordersCount}</p>
-              <p className="text-[10px] uppercase tracking-wider text-gray-500">Orders</p>
+              <p className="text-lg font-black text-gray-900 tabular-nums">{ordersCount}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{t('nav.orders')}</p>
             </div>
             <div className="rounded-2xl bg-white p-3 border border-primary/10">
               <div className="mb-2 inline-flex rounded-xl bg-primary/10 p-2 text-primary">
                 <Star size={14} />
               </div>
-              <p className="text-lg font-black text-gray-900">{favoritesCount}</p>
-              <p className="text-[10px] uppercase tracking-wider text-gray-500">Saved</p>
+              <p className="text-lg font-black text-gray-900 tabular-nums">{favoritesCount}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{t('nav.saved')}</p>
             </div>
             <div className="rounded-2xl bg-white p-3 border border-primary/10">
               <div className="mb-2 inline-flex rounded-xl bg-primary/10 p-2 text-primary">
                 <Wallet size={14} />
               </div>
-              <p className="text-lg font-black text-gray-900">{paymentMethodsCount}</p>
-              <p className="text-[10px] uppercase tracking-wider text-gray-500">Payments</p>
+              <p className="text-lg font-black text-gray-900 tabular-nums">{paymentMethodsCount}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{t('profile.payments')}</p>
             </div>
           </div>
         </div>
