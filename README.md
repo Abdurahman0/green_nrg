@@ -6,6 +6,9 @@
 
 This contains everything you need to run your app locally.
 
+Documentation:
+- `docs/SOLAR_CRM_WEBAPP_API_GUIDE_UZ.md`
+
 ## Run Locally
 
 **Prerequisites:**  Node.js
