@@ -37,7 +37,9 @@ export const debugStore = {
   subscribe(cb: Listener) {
     listeners.add(cb);
     cb(entries);
-    return () => listeners.delete(cb);
+    return () => {
+      listeners.delete(cb);
+    };
   },
   get() {
     return entries;

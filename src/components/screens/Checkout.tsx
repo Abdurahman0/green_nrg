@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ShoppingBag, Trash2, Plus, Minus, CreditCard, ShieldCheck, CheckCircle2, ImageOff } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import { api } from '@/services/api';
-import { motion, AnimatePresence } from 'motion/react';
+import { debugStore, makeId } from '@/lib/debugStore';
+import { motion } from 'motion/react';
 import { useI18n } from '@/lib/i18n';
 import { getProductImage } from '@/lib/productMedia';
 
@@ -19,12 +20,63 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [step, setStep] = useState<'cart' | 'success'>('cart');
   const [orderRef, setOrderRef] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState<string>('click');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [fulfillmentMethod, setFulfillmentMethod] = useState<'delivery' | 'pickup'>('delivery');
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const prefill = async () => {
+      try {
+        const bootstrap = await api.getBootstrap();
+        if (cancelled) return;
+
+        const methods = Array.isArray(bootstrap.payment_methods)
+          ? bootstrap.payment_methods.filter((m) => typeof m === 'string' && m.trim())
+          : [];
+
+        setPaymentMethods(methods);
+        if (methods.length > 0) {
+          setPaymentMethod((prev) => (prev && prev.trim() ? prev : methods[0]));
+        }
+
+        const customer = bootstrap.customer;
+        if (customer?.full_name) setFullName(customer.full_name);
+        if (customer?.phone) setPhone(customer.phone);
+        if (customer?.address) setAddress(customer.address);
+      } catch {
+        // Keep checkout usable even if bootstrap fails (e.g. backend 401 during setup).
+      }
+    };
+
+    prefill();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const canSubmit = useMemo(() => items.length > 0 && !isProcessing, [isProcessing, items.length]);
+
   const handleCheckout = async () => {
+    setErrorMessage(null);
+    if (items.length === 0) {
+      setErrorMessage(t('checkout.error.emptyCart'));
+      return;
+    }
+    if (!phone.trim()) {
+      setErrorMessage(t('checkout.error.phoneRequired'));
+      return;
+    }
+    if (fulfillmentMethod === 'delivery' && !address.trim()) {
+      setErrorMessage(t('checkout.error.addressRequired'));
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const response = await api.checkout({
@@ -32,14 +84,25 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
         phone: phone || undefined,
         address: fulfillmentMethod === 'delivery' ? address || undefined : undefined,
         fulfillment_method: fulfillmentMethod,
-        payment_method: 'telegram',
+        payment_method: paymentMethod || undefined,
         items,
       });
       setOrderRef(response.contract_id || response.message);
       setStep('success');
       clearCart();
     } catch (error) {
-      console.error(error);
+      const message =
+        error instanceof Error && error.message.trim()
+          ? error.message
+          : t('checkout.error.generic');
+      setErrorMessage(message);
+      debugStore.push({
+        id: makeId(),
+        ts: Date.now(),
+        kind: 'log',
+        message: 'Checkout: failed',
+        meta: { message },
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -100,16 +163,12 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
             </div>
             
             {items.length > 0 ? (
-              <AnimatePresence mode="popLayout">
+              <div className="space-y-3">
                 {items.map((item) => {
                   const productImage = getProductImage(item);
                   return (
-                    <motion.div 
+                    <div
                       key={item.id}
-                      layout
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
                       className="flex gap-4 p-4 bg-gray-50 rounded-3xl border border-gray-100"
                     >
                       <div className="w-20 h-20 rounded-2xl bg-white overflow-hidden flex-shrink-0 shadow-sm">
@@ -153,12 +212,12 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
                             <Plus size={14} />
                           </button>
                         </div>
+                        </div>
                       </div>
-                      </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
-              </AnimatePresence>
+              </div>
             ) : (
               <div className="py-12 text-center">
                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mx-auto mb-4">
@@ -172,18 +231,18 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
 
           {/* Payment Method Placeholder */}
           <div className="space-y-3">
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Contact Details</h2>
+            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">{t('checkout.contactTitle')}</h2>
             <div className="p-4 bg-white rounded-3xl border border-gray-100 space-y-3">
               <input
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Full name"
+                placeholder={t('checkout.fullName')}
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/20"
               />
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="Phone number"
+                placeholder={t('checkout.phone')}
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/20"
               />
               <div className="grid grid-cols-2 gap-2">
@@ -195,7 +254,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
                       : 'border-gray-200 bg-white text-gray-500'
                   }`}
                 >
-                  Delivery
+                  {t('checkout.deliveryOption')}
                 </button>
                 <button
                   onClick={() => setFulfillmentMethod('pickup')}
@@ -205,14 +264,14 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
                       : 'border-gray-200 bg-white text-gray-500'
                   }`}
                 >
-                  Pickup
+                  {t('checkout.pickupOption')}
                 </button>
               </div>
               {fulfillmentMethod === 'delivery' && (
                 <textarea
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Delivery address"
+                  placeholder={t('checkout.address')}
                   rows={3}
                   className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/20"
                 />
@@ -228,12 +287,29 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
                   <CreditCard size={24} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900">Telegram Pay</h3>
+                  <h3 className="text-sm font-bold text-gray-900">{t('checkout.paymentDefault')}</h3>
                   <p className="text-[10px] font-medium text-gray-400">{t('checkout.secureVia')}</p>
                 </div>
               </div>
               <div className="w-5 h-5 rounded-full border-4 border-primary bg-white" />
             </div>
+            {paymentMethods.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {paymentMethods.map((method) => (
+                  <button
+                    key={method}
+                    onClick={() => setPaymentMethod(method)}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-colors ${
+                      paymentMethod === method
+                        ? 'border-primary bg-primary text-white'
+                        : 'border-gray-200 bg-white text-gray-600'
+                    }`}
+                  >
+                    {method}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           {/* Trust Badges */}
@@ -267,10 +343,16 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
             <span className="text-2xl font-black text-primary">${totalPrice.toLocaleString()}</span>
           </div>
         </div>
+
+        {errorMessage ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {errorMessage}
+          </div>
+        ) : null}
         
         <Button 
           className="w-full h-16 rounded-[2rem] text-lg font-bold shadow-2xl shadow-primary/30 relative overflow-hidden group"
-          disabled={items.length === 0 || isProcessing}
+          disabled={!canSubmit}
           onClick={handleCheckout}
         >
           {isProcessing ? (
