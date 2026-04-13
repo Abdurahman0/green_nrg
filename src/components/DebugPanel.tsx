@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useDebug } from '@/lib/DebugContext';
 import { getApiBaseUrl } from '@/config';
+import { api } from '@/services/api';
+import { makeId } from '@/lib/debugStore';
 
 export const DebugPanel: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -64,6 +66,37 @@ export const DebugPanel: React.FC = () => {
             <div className="flex items-center justify-between gap-2">
               <div className="text-sm font-black text-gray-900">Debug</div>
               <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={async () => {
+                    debugStore.push({
+                      id: makeId(),
+                      ts: Date.now(),
+                      kind: 'log',
+                      message: 'Debug: manual bootstrap retry',
+                    });
+                    try {
+                      await api.getBootstrap();
+                      debugStore.push({
+                        id: makeId(),
+                        ts: Date.now(),
+                        kind: 'log',
+                        message: 'Debug: bootstrap retry success',
+                      });
+                    } catch (err) {
+                      debugStore.push({
+                        id: makeId(),
+                        ts: Date.now(),
+                        kind: 'log',
+                        message: 'Debug: bootstrap retry error',
+                        meta: { error: err instanceof Error ? err.message : String(err) },
+                      });
+                    }
+                  }}
+                >
+                  Retry
+                </Button>
                 <Button variant="ghost" size="sm" onClick={() => debugStore.clear()}>
                   Clear
                 </Button>
