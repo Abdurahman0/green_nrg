@@ -79,6 +79,11 @@ export interface CategoryDetail {
   products: Product[];
 }
 
+export interface LocationPoint {
+  latitude: number;
+  longitude: number;
+}
+
 export interface CheckoutItemInput {
   id: string;
   quantity: number;
@@ -89,6 +94,7 @@ export interface CheckoutPayload {
   phone?: string;
   fulfillment_method?: 'pickup' | 'delivery';
   address?: string;
+  location?: LocationPoint;
   payment_method?: string;
   items: CheckoutItemInput[];
 }

@@ -83,6 +83,11 @@
   "checkout.deliveryOption": "Доставка",
   "checkout.pickupOption": "Самовывоз",
   "checkout.address": "Адрес доставки",
+  "checkout.locationTitle": "Адрес (карта)",
+  "checkout.locationHint": "Разрешите доступ к геолокации или введите адрес.",
+  "checkout.addressTitle": "Адрес",
+  "checkout.useCurrentLocation": "Использовать текущее местоположение",
+  "checkout.locationPicked": "Выбранная точка",
   "checkout.paymentDefault": "Оплата",
   "checkout.secureVia": "Безопасная оплата через Telegram",
   "checkout.secure": "Безопасная оплата",
@@ -95,11 +100,10 @@
   "checkout.confirm": "Подтвердить заказ",
   "checkout.error.emptyCart": "Корзина пуста. Сначала добавьте товары.",
   "checkout.error.phoneRequired": "Введите номер телефона.",
-  "checkout.error.addressRequired": "Введите адрес доставки.",
+  "checkout.error.addressOrLocationRequired": "Для доставки нужен адрес или точка на карте.",
   "checkout.error.generic": "Не удалось оформить заказ. Попробуйте снова.",
   "checkout.placed": "Заказ оформлен!",
   "checkout.thanks": "Спасибо, что выбрали Green NRG.",
   "checkout.track": "Отследить заказ",
   "checkout.backHome": "Назад на главную"
 }
-

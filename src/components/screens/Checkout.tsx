@@ -8,6 +8,8 @@ import { debugStore, makeId } from '@/lib/debugStore';
 import { motion } from 'motion/react';
 import { useI18n } from '@/lib/i18n';
 import { getProductImage } from '@/lib/productMedia';
+import { LocationPicker } from '@/components/checkout/LocationPicker';
+import type { LocationPoint } from '@/types';
 
 interface CheckoutProps {
   onBack: () => void;
@@ -15,7 +17,7 @@ interface CheckoutProps {
 }
 
 export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { items, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   const [step, setStep] = useState<'cart' | 'success'>('cart');
@@ -26,6 +28,8 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [location, setLocation] = useState<LocationPoint | null>(null);
+  const [locationHint, setLocationHint] = useState<string | null>(null);
   const [fulfillmentMethod, setFulfillmentMethod] = useState<'delivery' | 'pickup'>('delivery');
 
   useEffect(() => {
@@ -72,8 +76,8 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
       setErrorMessage(t('checkout.error.phoneRequired'));
       return;
     }
-    if (fulfillmentMethod === 'delivery' && !address.trim()) {
-      setErrorMessage(t('checkout.error.addressRequired'));
+    if (fulfillmentMethod === 'delivery' && !address.trim() && !location) {
+      setErrorMessage(t('checkout.error.addressOrLocationRequired'));
       return;
     }
 
@@ -83,6 +87,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
         full_name: fullName || undefined,
         phone: phone || undefined,
         address: fulfillmentMethod === 'delivery' ? address || undefined : undefined,
+        location: fulfillmentMethod === 'delivery' ? location ?? undefined : undefined,
         fulfillment_method: fulfillmentMethod,
         payment_method: paymentMethod || undefined,
         items,
@@ -257,7 +262,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
                   {t('checkout.deliveryOption')}
                 </button>
                 <button
-                  onClick={() => setFulfillmentMethod('pickup')}
+                  onClick={() => {
+                    setFulfillmentMethod('pickup');
+                    setLocationHint(null);
+                  }}
                   className={`rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
                     fulfillmentMethod === 'pickup'
                       ? 'border-primary bg-primary text-white'
@@ -267,17 +275,52 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
                   {t('checkout.pickupOption')}
                 </button>
               </div>
-              {fulfillmentMethod === 'delivery' && (
-                <textarea
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder={t('checkout.address')}
-                  rows={3}
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/20"
-                />
-              )}
             </div>
           </div>
+
+          {fulfillmentMethod === 'delivery' ? (
+            <div className="space-y-2">
+              <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">
+                {t('checkout.locationTitle')}
+              </h2>
+              <LocationPicker
+                locale={lang}
+                title={t('checkout.locationTitle')}
+                hint={t('checkout.locationHint')}
+                addressTitle={t('checkout.addressTitle')}
+                addressPlaceholder={t('checkout.address')}
+                actionLabel={t('checkout.useCurrentLocation')}
+                pickedLabel={t('checkout.locationPicked')}
+                location={location}
+                addressValue={address}
+                onAddressChange={setAddress}
+                onSelectLocation={setLocation}
+                onPickLocation={() => {
+                  setLocationHint(null);
+                  if (typeof navigator === 'undefined' || !navigator.geolocation) {
+                    setLocationHint(t('checkout.locationHint'));
+                    return;
+                  }
+                  navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                      setLocationHint(null);
+                      setLocation({
+                        latitude: pos.coords.latitude,
+                        longitude: pos.coords.longitude,
+                      });
+                    },
+                    () => {
+                      setLocationHint(t('checkout.locationHint'));
+                    },
+                    { enableHighAccuracy: true }
+                  );
+                }}
+              />
+              {locationHint ? (
+                <p className="text-xs text-gray-400">{locationHint}</p>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className="space-y-4">
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">{t('checkout.paymentMethod')}</h2>
