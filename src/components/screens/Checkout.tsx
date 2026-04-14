@@ -374,55 +374,55 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
               {t('checkout.official')}
             </div>
           </div>
+
+        {/* Summary & Action */}
+        <div className="mt-4 bg-gray-50/50 rounded-3xl border border-gray-100 p-6 space-y-6 pb-safe-area-bottom">
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500 font-medium">{t('checkout.subtotal')}</span>
+              <span className="text-gray-900 font-bold tabular-nums tracking-tight">
+                {totalParts.amount} {totalParts.currency}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500 font-medium">{t('checkout.delivery')}</span>
+              <span className="text-primary font-bold">{t('checkout.free')}</span>
+            </div>
+            <div className="flex justify-between pt-3 border-t border-gray-50">
+              <span className="text-lg font-bold text-gray-900">{t('checkout.total')}</span>
+              <span className="flex flex-wrap items-baseline gap-x-1 text-primary leading-none tabular-nums tracking-tight">
+                <span className="text-2xl font-black">{totalParts.amount}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-primary/80">{totalParts.currency}</span>
+              </span>
+            </div>
+          </div>
+
+          {errorMessage ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {errorMessage}
+            </div>
+          ) : null}
+          
+          <Button 
+            className="w-full h-16 rounded-[2rem] text-lg font-bold shadow-xl shadow-primary/20 relative overflow-hidden group"
+            disabled={!canSubmit}
+            onClick={handleCheckout}
+          >
+            {isProcessing ? (
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                {t('checkout.processing')}
+              </div>
+            ) : (
+              <>
+                {t('checkout.confirm')}
+                <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              </>
+            )}
+          </Button>
+        </div>
         </div>
       </ScrollArea>
-
-      {/* Summary & Action */}
-      <div className="p-8 bg-white border-t border-gray-100 space-y-6 pb-safe-area-bottom">
-        <div className="space-y-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500 font-medium">{t('checkout.subtotal')}</span>
-            <span className="text-gray-900 font-bold tabular-nums tracking-tight">
-              {totalParts.amount} {totalParts.currency}
-            </span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500 font-medium">{t('checkout.delivery')}</span>
-            <span className="text-primary font-bold">{t('checkout.free')}</span>
-          </div>
-          <div className="flex justify-between pt-3 border-t border-gray-50">
-            <span className="text-lg font-bold text-gray-900">{t('checkout.total')}</span>
-            <span className="flex flex-wrap items-baseline gap-x-1 text-primary leading-none tabular-nums tracking-tight">
-              <span className="text-2xl font-black">{totalParts.amount}</span>
-              <span className="text-[10px] font-black uppercase tracking-widest text-primary/80">{totalParts.currency}</span>
-            </span>
-          </div>
-        </div>
-
-        {errorMessage ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {errorMessage}
-          </div>
-        ) : null}
-        
-        <Button 
-          className="w-full h-16 rounded-[2rem] text-lg font-bold shadow-2xl shadow-primary/30 relative overflow-hidden group"
-          disabled={!canSubmit}
-          onClick={handleCheckout}
-        >
-          {isProcessing ? (
-            <div className="flex items-center gap-3">
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              {t('checkout.processing')}
-            </div>
-          ) : (
-            <>
-              {t('checkout.confirm')}
-              <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-            </>
-          )}
-        </Button>
-      </div>
     </div>
   );
 };
