@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   Settings,
-  CreditCard,
-  MapPin,
-  Bell,
-  Shield,
-  LogOut,
   ChevronRight,
   Heart,
   ShoppingBag,
@@ -69,10 +64,6 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   const menuItems = [
     { icon: ShoppingBag, label: t('profile.orders'), sub: t('profile.ordersSub'), tab: 'orders' },
     { icon: Heart, label: t('profile.favorites'), sub: t('profile.favoritesSub'), tab: 'favorites' },
-    { icon: CreditCard, label: t('profile.payments'), sub: t('profile.paymentsSub') },
-    { icon: MapPin, label: t('profile.addresses'), sub: t('profile.addressesSub') },
-    { icon: Bell, label: t('profile.notifications'), sub: t('profile.notificationsSub') },
-    { icon: Shield, label: t('profile.privacy'), sub: t('profile.privacySub') },
   ];
 
   return (
@@ -170,37 +161,11 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
                 />
               </button>
             ))}
-
-            <button className="w-full flex items-center justify-between p-4 bg-red-50/50 rounded-3xl border border-red-100 mt-6 group">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-red-50 rounded-2xl text-red-500">
-                  <LogOut size={20} />
-                </div>
-                <div className="text-left">
-                  <h3 className="text-sm font-bold text-red-600">{t('profile.signOut')}</h3>
-                  <p className="text-[10px] font-medium text-red-400">{t('profile.signOutSub')}</p>
-                </div>
-              </div>
-            </button>
           </div>
         </>
       )}
 
-      <div className="p-10 text-center">
-        <p className="text-[10px] font-bold text-gray-300 uppercase tracking-[0.2em]">
-          Green NRG Energy Solutions
-        </p>
-        <p className="text-[10px] text-gray-300 mt-1">v1.0.4 Premium WebApp</p>
-        <button
-          type="button"
-          onClick={() => {
-            setDebugEnabled(!debugEnabled);
-          }}
-          className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70 hover:text-primary"
-        >
-          {debugEnabled ? 'Hide debug' : 'Show debug'}
-        </button>
-      </div>
+
     </div>
   );
 };

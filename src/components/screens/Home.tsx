@@ -18,7 +18,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
   const { t } = useI18n();
   const [bootstrap, setBootstrap] = useState<BootstrapData | null>(null);
   const [catalog, setCatalog] = useState<CatalogData | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,14 +29,12 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
         message: 'Home: fetchData started',
       });
       try {
-        const [b, c, r] = await Promise.all([
+        const [b, c] = await Promise.all([
           api.getBootstrap(),
-          api.getCatalog(),
-          api.getReviews()
+          api.getCatalog()
         ]);
         setBootstrap(b);
         setCatalog(c);
-        setReviews(r);
         debugStore.push({
           id: makeId(),
           ts: Date.now(),
@@ -46,7 +43,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
           meta: {
             products: c.products.length,
             promoted: c.promoted_products.length,
-            reviews: r.length,
           },
         });
       } catch (error) {
@@ -178,23 +174,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
         </div>
       </div>
 
-      {/* Trust Section */}
-      <section className="px-6 mb-10">
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { icon: Leaf, label: t('home.eco'), color: 'bg-primary/10 text-primary' },
-            { icon: ShieldCheck, label: t('home.certified'), color: 'bg-primary/10 text-primary' },
-            { icon: Star, label: t('home.premium'), color: 'bg-primary/10 text-primary' },
-          ].map((item, i) => (
-            <div key={i} className="flex flex-col items-center gap-2">
-              <div className={cn("p-4 rounded-2xl", item.color)}>
-                <item.icon size={24} />
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{item.label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* Featured Products Grid */}
       <section className="px-6 mb-10">
@@ -211,38 +190,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
               product={product} 
               onClick={onProductClick}
             />
-          ))}
-        </div>
-      </section>
-
-      {/* Reviews Preview */}
-      <section className="px-6 mb-10">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-gray-900">{t('home.reviewsTitle')}</h2>
-          <Button variant="ghost" size="sm" className="text-primary font-semibold" onClick={() => onNavigate('profile')}>
-            {t('home.allReviews')}
-          </Button>
-        </div>
-        <div className="space-y-4">
-          {reviews.slice(0, 2).map((review) => (
-            <div key={review.id} className="p-5 bg-gray-50 rounded-3xl border border-gray-100">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-primary font-bold shadow-sm">
-                  {review.user[0]}
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-gray-900">{review.user}</h4>
-                  <div className="flex text-primary">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={12} fill={i < review.rating ? "currentColor" : "none"} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 italic leading-relaxed">
-                "{review.comment}"
-              </p>
-            </div>
           ))}
         </div>
       </section>
