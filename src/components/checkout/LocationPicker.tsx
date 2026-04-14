@@ -221,7 +221,6 @@ export function LocationPicker({
             placemarkRef.current.geometry.setCoordinates(coords);
           }
 
-          map.setCenter(coords, 15, { duration: 250 });
           skipNextLocationSyncRef.current = true;
           onSelectLocationRef.current({ latitude: coords[0], longitude: coords[1] });
           void resolveAddressAndFill(coords);
@@ -347,6 +346,11 @@ export function LocationPicker({
         <p className="text-xs text-gray-400 mt-1">{hint}</p>
       </div>
 
+      <div
+        ref={mapContainerRef}
+        className="h-56 w-full overflow-hidden rounded-2xl border border-gray-200 bg-gray-50"
+      />
+
       <div className="space-y-2">
         <p className="text-[11px] font-black uppercase tracking-widest text-gray-400">{addressTitle}</p>
         <input
@@ -356,11 +360,6 @@ export function LocationPicker({
           className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/20"
         />
       </div>
-
-      <div
-        ref={mapContainerRef}
-        className="h-56 w-full overflow-hidden rounded-2xl border border-gray-200 bg-gray-50"
-      />
 
       {location ? (
         <p className="text-xs text-primary font-semibold">
