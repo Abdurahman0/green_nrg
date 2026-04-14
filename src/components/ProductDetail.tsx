@@ -82,7 +82,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
         <div className="px-6 pb-32 -mt-10 relative z-10">
           <div className="flex items-center gap-2 mb-3">
             <Badge className="bg-primary/10 text-primary border-none px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
-              {product.category__name || 'Category'}
+              {product.category?.name ?? product.category_name ?? product.category__name ?? 'Category'}
             </Badge>
           </div>
 
@@ -109,7 +109,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
             <div className="space-y-2">
               {[
                 { label: t('product.spec.model'), value: product.id },
-                { label: 'Category', value: product.category__name || '-' },
+                { label: 'Category', value: product.category?.name ?? product.category_name ?? product.category__name ?? '-' },
               ].map((spec, i) => (
                 <div key={i} className="flex justify-between py-3 border-b border-gray-50 text-sm">
                   <span className="text-gray-500 font-medium">{spec.label}</span>

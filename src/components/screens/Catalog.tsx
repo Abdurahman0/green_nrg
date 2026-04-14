@@ -19,7 +19,6 @@ interface CatalogProps {
 export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart }) => {
   const { t, lang } = useI18n();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
@@ -27,6 +26,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+  // Initial load: fetch categories (non-empty only) + all products
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -35,8 +35,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
           api.getCategories(),
           api.getCatalog()
         ]);
-        setCategories([{ id: 'all', name: t('catalog.all'), code: 'all' }, ...cats]);
-        setAllProducts(catalog.products);
+        setCategories(cats);
         setProducts(catalog.products);
       } catch (error) {
         console.error(error);
@@ -47,20 +46,17 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
     fetchData();
   }, [t]);
 
+  // When category chip changes, re-fetch filtered catalog from server
   useEffect(() => {
+    if (selectedCategory === 'all') return; // handled by initial load
     if (!categories.length) return;
 
-    if (selectedCategory === 'all') {
-      setProducts(allProducts);
-      return;
-    }
-
     let isMounted = true;
-
     const loadCategoryProducts = async () => {
       setCategoryLoading(true);
       try {
-        const detail = await api.getCategoryDetail(selectedCategory);
+        // Backend accepts both uuid and code — we use code for nicer URLs
+        const detail = await api.getCatalog(selectedCategory);
         if (isMounted) setProducts(detail.products);
       } catch (error) {
         console.error(error);
@@ -68,13 +64,9 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
         if (isMounted) setCategoryLoading(false);
       }
     };
-
     loadCategoryProducts();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedCategory, categories.length, allProducts]);
+    return () => { isMounted = false; };
+  }, [selectedCategory, categories.length]);
 
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -129,13 +121,17 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
             {loading ? (
               [...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-24 rounded-full" />)
             ) : (
-              categories.map((cat) => (
+              // "All" chip first, then filtered categories from backend (non-empty only)
+              [{ id: 'all', name: t('catalog.all'), code: 'all' }, ...categories].map((cat) => (
                 <button
                   key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
+                  onClick={() => {
+                    // Use code for filtering (also accepts uuid — both work)
+                    setSelectedCategory(cat.code === 'all' ? 'all' : cat.code);
+                  }}
                   className={cn(
                     "shrink-0 px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border",
-                    selectedCategory === cat.id
+                    selectedCategory === (cat.code === 'all' ? 'all' : cat.code)
                       ? "bg-primary border-primary text-white shadow-lg shadow-primary/20"
                       : "bg-white border-gray-100 text-gray-500 hover:border-primary/30 hover:text-primary"
                   )}
@@ -190,7 +186,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                   <div className="flex flex-col justify-between py-1 flex-1 min-w-0">
                     <div>
                       <span className="text-[10px] font-bold text-primary uppercase tracking-widest">
-                        {product.category__name}
+                        {product.category?.name ?? product.category_name ?? product.category__name}
                       </span>
                       <h3 className="font-bold text-gray-900 text-sm line-clamp-1 mt-0.5">
                         {product.name}

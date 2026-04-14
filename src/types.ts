@@ -26,10 +26,18 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  /** Full category object (new API) */
+  category?: Category;
+  /** Backward-compat: category_name flat field (new API) */
+  category_name?: string;
+  /** Legacy flat field kept for backward compat */
   category__name?: string;
   description?: string;
   image_url?: string;
   primary_image_url?: string;
+  is_promoted?: boolean;
+  stock_quantity?: number;
+  image_urls?: string[];
 }
 
 export interface Order {

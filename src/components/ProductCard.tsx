@@ -90,10 +90,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             />
           </button>
           
-          {product.category__name && (
+          {(product.category?.name ?? product.category_name ?? product.category__name) && (
             <div className="absolute bottom-3 left-3">
               <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-white/90 text-primary rounded-md">
-                {product.category__name}
+                {product.category?.name ?? product.category_name ?? product.category__name}
               </span>
             </div>
           )}

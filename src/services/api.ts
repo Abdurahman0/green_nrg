@@ -166,17 +166,36 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
   return unwrapData<T>(payload);
 };
 
-const normalizeProduct = (product: Record<string, unknown>): Product => ({
-  id: String(product.id ?? ''),
-  name: String(product.name ?? ''),
-  price: toNumber(product.price),
-  category__name:
-    typeof product.category__name === 'string' ? product.category__name : undefined,
-  description: typeof product.description === 'string' ? product.description : undefined,
-  image_url: typeof product.image_url === 'string' ? product.image_url : undefined,
-  primary_image_url:
-    typeof product.primary_image_url === 'string' ? product.primary_image_url : undefined,
-});
+const normalizeProduct = (product: Record<string, unknown>): Product => {
+  // Resolve category object from either 'category' (new API) or flat fields
+  let category: Category | undefined;
+  if (product.category && typeof product.category === 'object') {
+    category = normalizeCategory(product.category as Record<string, unknown>);
+  }
+
+  return {
+    id: String(product.id ?? ''),
+    name: String(product.name ?? ''),
+    price: toNumber(product.price),
+    category,
+    category_name:
+      typeof product.category_name === 'string' ? product.category_name : undefined,
+    category__name:
+      typeof product.category__name === 'string'
+        ? product.category__name
+        : category?.name,
+    description: typeof product.description === 'string' ? product.description : undefined,
+    image_url: typeof product.image_url === 'string' ? product.image_url : undefined,
+    primary_image_url:
+      typeof product.primary_image_url === 'string' ? product.primary_image_url : undefined,
+    is_promoted: typeof product.is_promoted === 'boolean' ? product.is_promoted : undefined,
+    stock_quantity:
+      product.stock_quantity !== undefined ? toNumber(product.stock_quantity) : undefined,
+    image_urls: Array.isArray(product.image_urls)
+      ? product.image_urls.map((u) => String(u))
+      : undefined,
+  };
+};
 
 const normalizeCategory = (category: Record<string, unknown>): Category => ({
   id: String(category.id ?? ''),
@@ -259,8 +278,9 @@ export const api = {
     };
   },
 
-  getCatalog: async (): Promise<CatalogData> => {
-    const raw = await request<unknown>('/catalog/');
+  getCatalog: async (categoryFilter?: string): Promise<CatalogData> => {
+    const qs = categoryFilter ? `?category=${encodeURIComponent(categoryFilter)}` : '';
+    const raw = await request<unknown>(`/catalog/${qs}`);
     const data = asRecord(raw);
     const categoriesRaw = Array.isArray(data.categories) ? data.categories : [];
     const brandsRaw = Array.isArray(data.brands) ? data.brands : [];
