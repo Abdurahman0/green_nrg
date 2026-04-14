@@ -9,6 +9,7 @@ import { dispatchCartFlyFromElement } from '@/lib/cartFly';
 import { useI18n } from '@/lib/i18n';
 import { getProductImage } from '@/lib/productMedia';
 import { ImageOff } from 'lucide-react';
+import { formatUZSParts } from '@/lib/money';
 
 interface ProductCardProps {
   product: Product;
@@ -19,7 +20,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onClick
 }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { items, addToCart, updateQuantity } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [isAnimating, setIsAnimating] = useState(false);
@@ -28,6 +29,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const quantity = cartItem?.quantity || 0;
   const isFav = isFavorite(product.id);
   const productImage = getProductImage(product);
+  const priceParts = formatUZSParts(product.price, lang);
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     dispatchCartFlyFromElement(e.currentTarget, productImage);
@@ -108,8 +110,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <div className="mt-3">
             <div className="flex min-w-0 flex-col">
               <span className="text-xs text-gray-400 font-medium uppercase tracking-tight">{t('product.price')}</span>
-              <span className="text-lg font-bold text-primary leading-none">
-                ${product.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              <span className="mt-0.5 flex flex-wrap items-baseline gap-x-1 gap-y-0.5 text-primary leading-none tabular-nums tracking-tight">
+                <span className="font-extrabold text-[clamp(0.95rem,3.8vw,1.125rem)]">{priceParts.amount}</span>
+                <span className="text-[10px] font-bold text-primary/80 uppercase tracking-widest">{priceParts.currency}</span>
               </span>
             </div>
 

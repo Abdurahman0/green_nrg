@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { useFavorites } from '@/lib/FavoritesContext';
 import { useI18n } from '@/lib/i18n';
 import { getProductImage } from '@/lib/productMedia';
+import { formatUZSParts } from '@/lib/money';
 
 interface ProductDetailProps {
   product: Product;
@@ -20,10 +21,11 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
   onClose,
   onAddToCart,
 }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { isFavorite, toggleFavorite } = useFavorites();
   const isFav = isFavorite(product.id);
   const productImage = getProductImage(product);
+  const priceParts = formatUZSParts(product.price, lang);
   return (
     <motion.div 
       initial={{ y: '100%' }}
@@ -89,8 +91,9 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
           </h1>
 
           <div className="mb-8">
-            <span className="text-3xl font-black text-primary">
-              ${product.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-primary leading-none tabular-nums tracking-tight">
+              <span className="text-3xl font-black">{priceParts.amount}</span>
+              <span className="text-xs font-black uppercase tracking-widest text-primary/80">{priceParts.currency}</span>
             </span>
           </div>
 
@@ -122,7 +125,10 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
       <div className="p-6 bg-white/80 backdrop-blur-xl border-t border-gray-100 flex gap-4 items-center pb-safe-area-bottom">
         <div className="flex flex-col">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('product.totalPrice')}</span>
-          <span className="text-xl font-black text-gray-900">${product.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+          <span className="flex flex-wrap items-baseline gap-x-1 text-gray-900 leading-none tabular-nums tracking-tight">
+            <span className="text-xl font-black">{priceParts.amount}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">{priceParts.currency}</span>
+          </span>
         </div>
         <Button 
           className="flex-1 h-14 rounded-2xl text-lg font-bold shadow-xl shadow-primary/20"

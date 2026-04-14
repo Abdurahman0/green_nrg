@@ -91,7 +91,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
   }
 
   const username = bootstrap?.user?.username?.trim() || 'User';
-  const displayName = bootstrap?.customer?.full_name?.trim() || username;
+  const isTechnicalUsername = /^tgwebapp_\d+$/i.test(username);
+  const displayName = bootstrap?.customer?.full_name?.trim() || (isTechnicalUsername ? t('user.defaultName') : username);
   const phone = bootstrap?.customer?.phone?.trim();
   const userInitial = displayName.charAt(0).toUpperCase();
   const featuredProducts =
@@ -105,8 +106,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
       {/* Header */}
       <header className="p-6 flex items-center justify-between bg-white sticky top-0 z-30">
         <div>
-          <p className="text-xs font-medium text-gray-400 uppercase tracking-widest">{t('home.welcomeBack')}</p>
-          <h1 className="text-2xl font-bold text-gray-900">{username}!</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('nav.home')}</h1>
         </div>
         <div className="flex gap-3">
           <button className="p-2.5 bg-gray-50 rounded-xl text-gray-600 hover:bg-primary/10 hover:text-primary transition-all">
@@ -127,7 +127,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
               </p>
               <h2 className="mt-1 text-xl font-black text-gray-900 truncate">{displayName}</h2>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                {displayName !== username ? (
+                {displayName !== username && !isTechnicalUsername ? (
                   <span className="font-semibold text-primary/80">@{username}</span>
                 ) : null}
                 {phone ? <span className="font-medium">{phone}</span> : null}

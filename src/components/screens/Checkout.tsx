@@ -10,6 +10,7 @@ import { useI18n } from '@/lib/i18n';
 import { getProductImage } from '@/lib/productMedia';
 import { LocationPicker } from '@/components/checkout/LocationPicker';
 import type { LocationPoint } from '@/types';
+import { formatUZSParts } from '@/lib/money';
 
 interface CheckoutProps {
   onBack: () => void;
@@ -19,6 +20,7 @@ interface CheckoutProps {
 export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
   const { t, lang } = useI18n();
   const { items, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
+  const totalParts = useMemo(() => formatUZSParts(totalPrice, lang), [lang, totalPrice]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [step, setStep] = useState<'cart' | 'success'>('cart');
   const [orderRef, setOrderRef] = useState<string>('');
@@ -201,7 +203,12 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
                         </button>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-lg font-black text-primary">${item.price.toLocaleString()}</span>
+                        <span className="flex flex-wrap items-baseline gap-x-1 text-primary leading-none tabular-nums tracking-tight">
+                          <span className="text-lg font-black">{formatUZSParts(item.price, lang).amount}</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-primary/80">
+                            {formatUZSParts(item.price, lang).currency}
+                          </span>
+                        </span>
                         <div className="flex items-center gap-3 bg-white rounded-xl p-1 border border-gray-100 shadow-sm">
                           <button 
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -375,7 +382,9 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
         <div className="space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-gray-500 font-medium">{t('checkout.subtotal')}</span>
-            <span className="text-gray-900 font-bold">${totalPrice.toLocaleString()}</span>
+            <span className="text-gray-900 font-bold tabular-nums tracking-tight">
+              {totalParts.amount} {totalParts.currency}
+            </span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-500 font-medium">{t('checkout.delivery')}</span>
@@ -383,7 +392,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
           </div>
           <div className="flex justify-between pt-3 border-t border-gray-50">
             <span className="text-lg font-bold text-gray-900">{t('checkout.total')}</span>
-            <span className="text-2xl font-black text-primary">${totalPrice.toLocaleString()}</span>
+            <span className="flex flex-wrap items-baseline gap-x-1 text-primary leading-none tabular-nums tracking-tight">
+              <span className="text-2xl font-black">{totalParts.amount}</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary/80">{totalParts.currency}</span>
+            </span>
           </div>
         </div>
 

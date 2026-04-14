@@ -6,6 +6,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
+import { formatUZSParts } from '@/lib/money';
 
 export const Orders: React.FC = () => {
   const { t, lang } = useI18n();
@@ -57,6 +58,7 @@ export const Orders: React.FC = () => {
         ) : orders.length > 0 ? (
           orders.map((order) => {
             const StatusIcon = getStatusIcon(order.status);
+            const totalParts = formatUZSParts(order.total_amount, lang);
             return (
               <div 
                 key={order.id} 
@@ -86,8 +88,9 @@ export const Orders: React.FC = () => {
                 <div className="flex items-center justify-between pt-4 border-t border-gray-50">
                   <div className="flex flex-col">
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('orders.total')}</span>
-                    <span className="text-lg font-black text-primary">
-                      ${order.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    <span className="flex flex-wrap items-baseline gap-x-1 text-primary leading-none tabular-nums tracking-tight">
+                      <span className="text-lg font-black">{totalParts.amount}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-primary/80">{totalParts.currency}</span>
                     </span>
                   </div>
                   <div className="flex items-center text-primary font-bold text-sm group-hover:translate-x-1 transition-transform">

@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { dispatchCartFlyFromElement } from '@/lib/cartFly';
 import { useI18n } from '@/lib/i18n';
 import { getProductImage } from '@/lib/productMedia';
+import { formatUZSParts } from '@/lib/money';
 
 interface CatalogProps {
   onProductClick: (product: Product) => void;
@@ -16,7 +17,7 @@ interface CatalogProps {
 }
 
 export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [categories, setCategories] = useState<Category[]>([]);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -160,6 +161,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
           )}>
             {filteredProducts.map((product) => {
               const productImage = getProductImage(product);
+              const priceParts = formatUZSParts(product.price, lang);
 
               return viewMode === 'grid' ? (
                 <div key={product.id} className="animate-in fade-in duration-200">
@@ -195,8 +197,9 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                       </h3>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-lg font-black text-primary">
-                        ${product.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      <span className="flex flex-wrap items-baseline gap-x-1 text-primary leading-none tabular-nums tracking-tight">
+                        <span className="text-lg font-black">{priceParts.amount}</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-primary/80">{priceParts.currency}</span>
                       </span>
                       <Button
                         size="sm"
