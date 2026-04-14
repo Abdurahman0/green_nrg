@@ -26,47 +26,37 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Initial load: fetch categories (non-empty only) + all products
+  // Fetch categories once on mount
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [cats, catalog] = await Promise.all([
-          api.getCategories(),
-          api.getCatalog()
-        ]);
-        setCategories(cats);
-        setProducts(catalog.products);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [t]);
+    api.getCategories().then(setCategories).catch(console.error);
+  }, []);
 
-  // When category chip changes, re-fetch filtered catalog from server
+  // Re-fetch products whenever selectedCategory changes
+  // 'all' → no filter param; any other value → pass as category code/uuid
   useEffect(() => {
-    if (selectedCategory === 'all') return; // handled by initial load
-    if (!categories.length) return;
-
     let isMounted = true;
-    const loadCategoryProducts = async () => {
-      setCategoryLoading(true);
+    const isFirst = selectedCategory === 'all';
+
+    const load = async () => {
+      if (isFirst) setLoading(true); else setCategoryLoading(true);
       try {
-        // Backend accepts both uuid and code — we use code for nicer URLs
-        const detail = await api.getCatalog(selectedCategory);
-        if (isMounted) setProducts(detail.products);
+        const catalog = await api.getCatalog(
+          selectedCategory === 'all' ? undefined : selectedCategory
+        );
+        if (isMounted) setProducts(catalog.products);
       } catch (error) {
         console.error(error);
       } finally {
-        if (isMounted) setCategoryLoading(false);
+        if (isMounted) {
+          setLoading(false);
+          setCategoryLoading(false);
+        }
       }
     };
-    loadCategoryProducts();
+
+    load();
     return () => { isMounted = false; };
-  }, [selectedCategory, categories.length]);
+  }, [selectedCategory]);
 
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())

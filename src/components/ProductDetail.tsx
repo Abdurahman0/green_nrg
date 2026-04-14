@@ -103,21 +103,6 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
               <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
             </div>
           ) : null}
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900">{t('product.specifications')}</h3>
-            <div className="space-y-2">
-              {[
-                { label: t('product.spec.model'), value: product.id },
-                { label: 'Category', value: product.category?.name ?? product.category_name ?? product.category__name ?? '-' },
-              ].map((spec, i) => (
-                <div key={i} className="flex justify-between py-3 border-b border-gray-50 text-sm">
-                  <span className="text-gray-500 font-medium">{spec.label}</span>
-                  <span className="text-gray-900 font-bold">{spec.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </ScrollArea>
 
