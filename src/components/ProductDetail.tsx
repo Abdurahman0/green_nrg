@@ -64,7 +64,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
             <img 
               src={productImage}
               alt={product.name}
-              className="w-full h-full object-cover object-top origin-top scale-[2] -translate-y-[45%]"
+              className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
             />
           ) : (
