@@ -161,7 +161,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                       <img
                         src={productImage}
                         alt={product.name}
-                        className="w-full h-full object-cover object-top transform-gpu group-hover:scale-[1.03] transition-transform duration-300"
+                        className="w-full h-full object-cover object-[50%_70%] transform-gpu group-hover:scale-[1.03] transition-transform duration-300"
                         referrerPolicy="no-referrer"
                       />
                     ) : (
