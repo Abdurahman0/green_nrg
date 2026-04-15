@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { X, Heart, ShoppingCart, ImageOff } from 'lucide-react';
 import { Product } from '@/types';
 import { Button } from './ui/button';
@@ -8,7 +8,6 @@ import { motion } from 'motion/react';
 import { useFavorites } from '@/lib/FavoritesContext';
 import { useI18n } from '@/lib/i18n';
 import { getProductImages } from '@/lib/productMedia';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { formatUZSParts } from '@/lib/money';
 
 interface ProductDetailProps {
@@ -25,8 +24,10 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
   const { t, lang } = useI18n();
   const { isFavorite, toggleFavorite } = useFavorites();
   const isFav = isFavorite(product.id);
-  const productImages = getProductImages(product, 3);
+  const productImages = useMemo(() => getProductImages(product, 3), [product]);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const priceParts = formatUZSParts(product.price, lang);
+  const activeImageSrc = productImages[activeImageIndex] ?? productImages[0];
   return (
     <motion.div 
       initial={{ y: '100%' }}
@@ -61,24 +62,9 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
       <ScrollArea className="flex-1 min-h-0">
         {/* Hero Image */}
         <div className="relative aspect-square bg-gray-50">
-          {productImages.length > 1 ? (
-            <Carousel opts={{ loop: true }} className="w-full h-full">
-              <CarouselContent className="-ml-0">
-                {productImages.map((src, idx) => (
-                  <CarouselItem key={`${src}_${idx}`} className="pl-0">
-                    <img
-                      src={src}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
-          ) : productImages.length === 1 ? (
+          {activeImageSrc ? (
             <img
-              src={productImages[0]}
+              src={activeImageSrc}
               alt={product.name}
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
@@ -96,6 +82,30 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
 
         {/* Content */}
         <div className="px-6 pb-32 -mt-10 relative z-10">
+          {productImages.length > 1 ? (
+            <div className="mb-5 -mt-2 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {productImages.slice(0, 3).map((src, idx) => (
+                <button
+                  key={`${src}_${idx}`}
+                  type="button"
+                  onClick={() => setActiveImageIndex(idx)}
+                  aria-label={`Image ${idx + 1}`}
+                  className={[
+                    'h-16 w-16 shrink-0 overflow-hidden rounded-2xl border bg-white shadow-sm transition-all',
+                    idx === activeImageIndex ? 'border-primary ring-2 ring-primary/20' : 'border-gray-100 hover:border-primary/20',
+                  ].join(' ')}
+                >
+                  <img
+                    src={src}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                </button>
+              ))}
+            </div>
+          ) : null}
+
           <div className="flex items-center gap-2 mb-3">
             <Badge className="bg-primary/10 text-primary border-none px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
               {product.category?.name ?? product.category_name ?? product.category__name ?? 'Category'}
