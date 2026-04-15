@@ -45,6 +45,19 @@ export const Orders: React.FC = () => {
     }
   };
 
+  const getStatusLabel = (status: Order['status']) => {
+    switch (status) {
+      case 'delivered':
+        return t('orders.status.delivered');
+      case 'shipped':
+        return t('orders.status.shipped');
+      case 'processing':
+        return t('orders.status.processing');
+      default:
+        return t('orders.status.unknown');
+    }
+  };
+
   return (
     <div className="pb-24">
       <header className="p-6 bg-white sticky top-0 z-30">
@@ -81,7 +94,7 @@ export const Orders: React.FC = () => {
                     </div>
                   </div>
                   <Badge className={cn("rounded-lg border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest", getStatusColor(order.status))}>
-                    {order.status}
+                    {getStatusLabel(order.status)}
                   </Badge>
                 </div>
                 
@@ -92,10 +105,6 @@ export const Orders: React.FC = () => {
                       <span className="text-lg font-black">{totalParts.amount}</span>
                       <span className="text-[10px] font-black uppercase tracking-widest text-primary/80">{totalParts.currency}</span>
                     </span>
-                  </div>
-                  <div className="flex items-center text-primary font-bold text-sm group-hover:translate-x-1 transition-transform">
-                    {t('orders.viewDetails')}
-                    <ChevronRight size={16} className="ml-1" />
                   </div>
                 </div>
               </div>
