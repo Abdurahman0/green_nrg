@@ -59,7 +59,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <img
               src={productImage}
               alt={product.name}
-              className="w-full h-full object-cover object-top transform-gpu transition-transform duration-300 scale-[1.35] -translate-y-[22%] group-hover:scale-[1.38]"
+              className="w-full h-full object-cover object-top origin-top transform-gpu transition-transform duration-300 scale-[2.2] -translate-y-[55%] group-hover:scale-[2.25]"
               referrerPolicy="no-referrer"
               onClick={() => onClick?.(product)}
             />
