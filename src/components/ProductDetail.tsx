@@ -7,7 +7,8 @@ import { ScrollArea } from './ui/scroll-area';
 import { motion } from 'motion/react';
 import { useFavorites } from '@/lib/FavoritesContext';
 import { useI18n } from '@/lib/i18n';
-import { getProductImage } from '@/lib/productMedia';
+import { getProductImages } from '@/lib/productMedia';
+import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { formatUZSParts } from '@/lib/money';
 
 interface ProductDetailProps {
@@ -24,7 +25,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
   const { t, lang } = useI18n();
   const { isFavorite, toggleFavorite } = useFavorites();
   const isFav = isFavorite(product.id);
-  const productImage = getProductImage(product);
+  const productImages = getProductImages(product, 3);
   const priceParts = formatUZSParts(product.price, lang);
   return (
     <motion.div 
@@ -60,9 +61,24 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
       <ScrollArea className="flex-1 min-h-0">
         {/* Hero Image */}
         <div className="relative aspect-square bg-gray-50">
-          {productImage ? (
-            <img 
-              src={productImage}
+          {productImages.length > 1 ? (
+            <Carousel opts={{ loop: true }} className="w-full h-full">
+              <CarouselContent className="-ml-0">
+                {productImages.map((src, idx) => (
+                  <CarouselItem key={`${src}_${idx}`} className="pl-0">
+                    <img
+                      src={src}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+          ) : productImages.length === 1 ? (
+            <img
+              src={productImages[0]}
               alt={product.name}
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"

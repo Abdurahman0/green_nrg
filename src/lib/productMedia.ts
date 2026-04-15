@@ -7,8 +7,24 @@ const isValidImageUrl = (value: string | undefined): value is string => {
   return /^https?:\/\//i.test(trimmed);
 };
 
+export const getProductImages = (product: Product, max = 3): string[] => {
+  const candidates: Array<string | undefined> = [
+    product.primary_image_url,
+    ...(Array.isArray(product.image_urls) ? product.image_urls : []),
+    product.image_url,
+  ];
+
+  const unique: string[] = [];
+  for (const value of candidates) {
+    if (!isValidImageUrl(value)) continue;
+    if (unique.includes(value)) continue;
+    unique.push(value);
+    if (unique.length >= Math.max(1, max)) break;
+  }
+
+  return unique;
+};
+
 export const getProductImage = (product: Product): string | undefined => {
-  if (isValidImageUrl(product.primary_image_url)) return product.primary_image_url;
-  if (isValidImageUrl(product.image_url)) return product.image_url;
-  return undefined;
+  return getProductImages(product, 1)[0];
 };
