@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, SlidersHorizontal, LayoutGrid, List, ImageOff } from 'lucide-react';
+import { Search, LayoutGrid, List, ImageOff } from 'lucide-react';
 import { api } from '@/services/api';
 import { Category, Product } from '@/types';
 import { ProductCard } from '../ProductCard';
@@ -100,9 +100,6 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
               className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-12 pr-4 text-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none"
             />
           </div>
-          <Button variant="outline" className="rounded-2xl border-gray-100 bg-gray-50 h-auto py-3 px-4">
-            <SlidersHorizontal size={18} />
-          </Button>
         </div>
 
         {/* Categories Chips */}
@@ -164,7 +161,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                       <img
                         src={productImage}
                         alt={product.name}
-                        className="w-full h-full object-cover transform-gpu group-hover:scale-[1.03] transition-transform duration-300"
+                        className="w-full h-full object-cover object-top transform-gpu group-hover:scale-[1.03] transition-transform duration-300"
                         referrerPolicy="no-referrer"
                       />
                     ) : (

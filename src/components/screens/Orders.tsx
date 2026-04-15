@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { ShoppingBag, Package, Truck, CheckCircle2, Clock, ChevronRight } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { api } from '@/services/api';
 import { Order } from '@/types';
 import { Skeleton } from '../ui/skeleton';
-import { Badge } from '../ui/badge';
-import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { formatUZSParts } from '@/lib/money';
 
@@ -27,37 +25,6 @@ export const Orders: React.FC = () => {
     fetchData();
   }, []);
 
-  const getStatusIcon = (status: Order['status']) => {
-    switch (status) {
-      case 'delivered': return CheckCircle2;
-      case 'shipped': return Truck;
-      case 'processing': return Clock;
-      default: return Package;
-    }
-  };
-
-  const getStatusColor = (status: Order['status']) => {
-    switch (status) {
-      case 'delivered': return "bg-primary/10 text-primary border-primary/20";
-      case 'shipped': return "bg-primary/5 text-primary/80 border-primary/10";
-      case 'processing': return "bg-secondary text-secondary-foreground border-primary/5";
-      default: return "bg-gray-50 text-gray-600 border-gray-100";
-    }
-  };
-
-  const getStatusLabel = (status: Order['status']) => {
-    switch (status) {
-      case 'delivered':
-        return t('orders.status.delivered');
-      case 'shipped':
-        return t('orders.status.shipped');
-      case 'processing':
-        return t('orders.status.processing');
-      default:
-        return t('orders.status.unknown');
-    }
-  };
-
   return (
     <div className="pb-24">
       <header className="p-6 bg-white sticky top-0 z-30">
@@ -70,32 +37,21 @@ export const Orders: React.FC = () => {
           [...Array(3)].map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-3xl" />)
         ) : orders.length > 0 ? (
           orders.map((order) => {
-            const StatusIcon = getStatusIcon(order.status);
             const totalParts = formatUZSParts(order.total_amount, lang);
             return (
               <div 
                 key={order.id} 
-                className="p-5 bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-all group cursor-pointer"
+                className="p-5 bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-all"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className={cn("p-2.5 rounded-xl border", getStatusColor(order.status))}>
-                      <StatusIcon size={20} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900">{order.title}</h3>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                        {new Date(order.created_at).toLocaleDateString(lang === 'uz' ? 'uz-UZ' : 'ru-RU', { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          year: 'numeric' 
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge className={cn("rounded-lg border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest", getStatusColor(order.status))}>
-                    {getStatusLabel(order.status)}
-                  </Badge>
+                <div className="mb-4">
+                  <h3 className="font-bold text-gray-900">{order.title}</h3>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    {new Date(order.created_at).toLocaleDateString(lang === 'uz' ? 'uz-UZ' : 'ru-RU', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </p>
                 </div>
                 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-50">
