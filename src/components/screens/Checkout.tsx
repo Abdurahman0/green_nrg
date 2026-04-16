@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ShoppingBag, Trash2, Plus, Minus, CreditCard, ShieldCheck, CheckCircle2, ImageOff } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Trash2, Plus, Minus, ShieldCheck, CheckCircle2, ImageOff } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
@@ -25,14 +25,11 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
   const [step, setStep] = useState<'cart' | 'success'>('cart');
   const [orderRef, setOrderRef] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState<string>('click');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [location, setLocation] = useState<LocationPoint | null>(null);
   const [locationHint, setLocationHint] = useState<string | null>(null);
-  const [fulfillmentMethod, setFulfillmentMethod] = useState<'delivery' | 'pickup'>('delivery');
 
   useEffect(() => {
     let cancelled = false;
@@ -41,15 +38,6 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
       try {
         const bootstrap = await api.getBootstrap();
         if (cancelled) return;
-
-        const methods = Array.isArray(bootstrap.payment_methods)
-          ? bootstrap.payment_methods.filter((m) => typeof m === 'string' && m.trim())
-          : [];
-
-        setPaymentMethods(methods);
-        if (methods.length > 0) {
-          setPaymentMethod((prev) => (prev && prev.trim() ? prev : methods[0]));
-        }
 
         const customer = bootstrap.customer;
         if (customer?.full_name) setFullName(customer.full_name);
@@ -78,7 +66,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
       setErrorMessage(t('checkout.error.phoneRequired'));
       return;
     }
-    if (fulfillmentMethod === 'delivery' && !address.trim() && !location) {
+    if (!address.trim() && !location) {
       setErrorMessage(t('checkout.error.addressOrLocationRequired'));
       return;
     }
@@ -88,10 +76,8 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
       const response = await api.checkout({
         full_name: fullName || undefined,
         phone: phone || undefined,
-        address: fulfillmentMethod === 'delivery' ? address || undefined : undefined,
-        location: fulfillmentMethod === 'delivery' ? location ?? undefined : undefined,
-        fulfillment_method: fulfillmentMethod,
-        payment_method: paymentMethod || undefined,
+        address: address || undefined,
+        location: location ?? undefined,
         items,
       });
       setOrderRef(response.contract_id || response.message);
@@ -257,108 +243,48 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
                 placeholder={t('checkout.phone')}
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/20"
               />
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setFulfillmentMethod('delivery')}
-                  className={`rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
-                    fulfillmentMethod === 'delivery'
-                      ? 'border-primary bg-primary text-white'
-                      : 'border-gray-200 bg-white text-gray-500'
-                  }`}
-                >
-                  {t('checkout.deliveryOption')}
-                </button>
-                <button
-                  onClick={() => {
-                    setFulfillmentMethod('pickup');
-                    setLocationHint(null);
-                  }}
-                  className={`rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
-                    fulfillmentMethod === 'pickup'
-                      ? 'border-primary bg-primary text-white'
-                      : 'border-gray-200 bg-white text-gray-500'
-                  }`}
-                >
-                  {t('checkout.pickupOption')}
-                </button>
-              </div>
             </div>
           </div>
 
-          {fulfillmentMethod === 'delivery' ? (
-            <div className="space-y-2">
-              <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">
-                {t('checkout.locationTitle')}
-              </h2>
-              <LocationPicker
-                locale={lang}
-                title={t('checkout.locationTitle')}
-                hint={t('checkout.locationHint')}
-                addressTitle={t('checkout.addressTitle')}
-                addressPlaceholder={t('checkout.address')}
-                actionLabel={t('checkout.useCurrentLocation')}
-                pickedLabel={t('checkout.locationPicked')}
-                location={location}
-                addressValue={address}
-                onAddressChange={setAddress}
-                onSelectLocation={setLocation}
-                onPickLocation={() => {
-                  setLocationHint(null);
-                  if (typeof navigator === 'undefined' || !navigator.geolocation) {
+          <div className="space-y-2">
+            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">
+              {t('checkout.locationTitle')}
+            </h2>
+            <LocationPicker
+              locale={lang}
+              title={t('checkout.locationTitle')}
+              hint={t('checkout.locationHint')}
+              addressTitle={t('checkout.addressTitle')}
+              addressPlaceholder={t('checkout.address')}
+              actionLabel={t('checkout.useCurrentLocation')}
+              pickedLabel={t('checkout.locationPicked')}
+              location={location}
+              addressValue={address}
+              onAddressChange={setAddress}
+              onSelectLocation={setLocation}
+              onPickLocation={() => {
+                setLocationHint(null);
+                if (typeof navigator === 'undefined' || !navigator.geolocation) {
+                  setLocationHint(t('checkout.locationHint'));
+                  return;
+                }
+                navigator.geolocation.getCurrentPosition(
+                  (pos) => {
+                    setLocationHint(null);
+                    setLocation({
+                      latitude: pos.coords.latitude,
+                      longitude: pos.coords.longitude,
+                    });
+                  },
+                  () => {
                     setLocationHint(t('checkout.locationHint'));
-                    return;
-                  }
-                  navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                      setLocationHint(null);
-                      setLocation({
-                        latitude: pos.coords.latitude,
-                        longitude: pos.coords.longitude,
-                      });
-                    },
-                    () => {
-                      setLocationHint(t('checkout.locationHint'));
-                    },
-                    { enableHighAccuracy: true }
-                  );
-                }}
-              />
-              {locationHint ? (
-                <p className="text-xs text-gray-400">{locationHint}</p>
-              ) : null}
-            </div>
-          ) : null}
-
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">{t('checkout.paymentMethod')}</h2>
-            <div className="p-5 bg-white rounded-3xl border-2 border-primary flex items-center justify-between shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-2xl text-primary">
-                  <CreditCard size={24} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-gray-900">{t('checkout.paymentDefault')}</h3>
-                  <p className="text-[10px] font-medium text-gray-400">{t('checkout.secureVia')}</p>
-                </div>
-              </div>
-              <div className="w-5 h-5 rounded-full border-4 border-primary bg-white" />
-            </div>
-            {paymentMethods.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {paymentMethods.map((method) => (
-                  <button
-                    key={method}
-                    onClick={() => setPaymentMethod(method)}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-colors ${
-                      paymentMethod === method
-                        ? 'border-primary bg-primary text-white'
-                        : 'border-gray-200 bg-white text-gray-600'
-                    }`}
-                  >
-                    {method}
-                  </button>
-                ))}
-              </div>
+                  },
+                  { enableHighAccuracy: true }
+                );
+              }}
+            />
+            {locationHint ? (
+              <p className="text-xs text-gray-400">{locationHint}</p>
             ) : null}
           </div>
 

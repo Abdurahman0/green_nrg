@@ -56,16 +56,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <Card className="overflow-hidden border border-gray-100 shadow-sm bg-white group rounded-2xl">
         <div className="relative aspect-square bg-gray-50 overflow-hidden">
           {productImage ? (
-            <div className="w-full h-full transform-gpu transition-transform duration-300 group-hover:scale-[1.03]">
-              <img
-                src={productImage}
-                alt={product.name}
-                className="w-full h-full object-cover object-top origin-top"
-                style={{ transform: 'translateY(-55%) scale(2.2)', transformOrigin: 'top center' }}
-                referrerPolicy="no-referrer"
-                onClick={() => onClick?.(product)}
-              />
-            </div>
+            <img
+              src={productImage}
+              alt={product.name}
+              className="w-full h-full object-cover object-center transform-gpu transition-transform duration-300 group-hover:scale-[1.03]"
+              referrerPolicy="no-referrer"
+              onClick={() => onClick?.(product)}
+            />
           ) : (
             <button
               type="button"
