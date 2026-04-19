@@ -102,6 +102,7 @@ export interface CheckoutPayload {
   phone?: string;
   fulfillment_method?: 'pickup' | 'delivery';
   address?: string;
+  audit_conclusion_kw?: number;
   location?: LocationPoint;
   payment_method?: string;
   items: CheckoutItemInput[];

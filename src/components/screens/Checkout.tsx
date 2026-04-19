@@ -27,6 +27,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [auditConclusionKw, setAuditConclusionKw] = useState('');
   const [address, setAddress] = useState('');
   const [location, setLocation] = useState<LocationPoint | null>(null);
   const [locationHint, setLocationHint] = useState<string | null>(null);
@@ -66,6 +67,11 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
       setErrorMessage(t('checkout.error.phoneRequired'));
       return;
     }
+    const auditKw = Number.parseFloat(auditConclusionKw);
+    if (!Number.isFinite(auditKw) || auditKw <= 0) {
+      setErrorMessage(t('checkout.error.auditConclusionRequired'));
+      return;
+    }
     if (!address.trim() && !location) {
       setErrorMessage(t('checkout.error.addressOrLocationRequired'));
       return;
@@ -76,6 +82,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
       const response = await api.checkout({
         full_name: fullName || undefined,
         phone: phone || undefined,
+        audit_conclusion_kw: auditKw,
         address: address || undefined,
         location: location ?? undefined,
         items,
@@ -241,6 +248,15 @@ export const Checkout: React.FC<CheckoutProps> = ({ onBack, onSuccess }) => {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder={t('checkout.phone')}
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/20"
+              />
+              <input
+                value={auditConclusionKw}
+                onChange={(e) => setAuditConclusionKw(e.target.value)}
+                type="number"
+                min="0.1"
+                step="0.1"
+                placeholder={t('checkout.auditConclusionKw')}
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/20"
               />
             </div>
