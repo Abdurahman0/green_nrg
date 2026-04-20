@@ -23,6 +23,7 @@ export interface SubsidyCalculatorData {
 }
 
 const API_BASE_URL = getApiBaseUrl();
+export const SUBSIDY_CALCULATOR_PATH = '/api/common/public/subsidy-calculator/';
 
 const unwrapData = <T>(payload: unknown): T => {
   if (payload && typeof payload === 'object' && 'data' in payload) {
@@ -37,7 +38,8 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
     headers.set('Content-Type', 'application/json');
   }
 
-  const url = `${API_BASE_URL}${path}`;
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const url = `${API_BASE_URL}${normalizedPath}`;
   debugStore.push({
     id: makeId(),
     ts: Date.now(),
@@ -126,7 +128,7 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
 
 export const common = {
   calculateSubsidy: async (payload: SubsidyPayload): Promise<SubsidyCalculatorData> =>
-    request<SubsidyCalculatorData>('api/common/public/subsidy-calculator/', {
+    request<SubsidyCalculatorData>(SUBSIDY_CALCULATOR_PATH, {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
