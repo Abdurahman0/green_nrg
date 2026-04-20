@@ -543,7 +543,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
                 error={subsidyErrors.panelType}
                 options={panelTypeOptions.map((option) => ({
                   value: option.value,
-                  label: subsidyCopy.panel[getPanelLabelKey(option.value)],
+                  label: option.label,
                 }))}
               />
 
@@ -556,8 +556,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
                 error={subsidyErrors.inverterType}
                 options={inverterTypeOptions.map((option) => ({
                   value: option.value,
-                  label: subsidyCopy.inverter[getInverterLabelKey(option.value)],
-                }))} 
+                  label: option.label,
+                }))}
               />
             </div>
 
@@ -570,7 +570,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
               error={subsidyErrors.requestedPowerKw}
               options={requestedPowerOptions.map((option) => ({
                 value: option.value,
-                label: option.value,
+                label: option.label,
               }))}
             />
 
