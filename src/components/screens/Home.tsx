@@ -20,10 +20,7 @@ import { debugStore, makeId } from '@/lib/debugStore';
 import ReactCountryFlag from 'react-country-flag';
 import { services } from '@/services';
 import type { SubsidyCalculatorData } from '@/services/common';
-import {
-  SUBSIDY_CALCULATOR_PATH,
-  SUBSIDY_CALCULATOR_PROXY_PATH,
-} from '@/services/common';
+import { SUBSIDY_CALCULATOR_PATH } from '@/services/common';
 import {
   inverterTypeOptions,
   panelTypeOptions,
@@ -35,19 +32,6 @@ interface SubsidyFormState {
   panelType: string;
   inverterType: string;
   requestedPowerKw: string;
-}
-
-interface SubsidyRequestDebug {
-  targetUrl: string;
-  requestUrl: string;
-  method: 'POST';
-  body: {
-    panel_type: string;
-    inverter_type: string;
-    requested_power_kw: number;
-    audit_power_kw: number;
-  };
-  error?: string;
 }
 
 type SubsidyFormErrors = Partial<Record<keyof SubsidyFormState, string>>;
@@ -178,11 +162,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
   const [subsidyResult, setSubsidyResult] = useState<SubsidyCalculatorData | null>(null);
   const [subsidyLoading, setSubsidyLoading] = useState(false);
   const [subsidyError, setSubsidyError] = useState<string | null>(null);
-  const [subsidyDebug, setSubsidyDebug] = useState<SubsidyRequestDebug | null>(null);
   const langMenuRef = useRef<HTMLDivElement | null>(null);
   const subsidyCopy = SUBSIDY_COPY[lang];
-  const subsidyApiUrl = `https://solar.api.cognilabs.org${SUBSIDY_CALCULATOR_PATH}`;
-  const subsidyRequestUrl = SUBSIDY_CALCULATOR_PROXY_PATH;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -297,12 +278,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
       requested_power_kw: requestedPowerKw,
       audit_power_kw: requestedPowerKw,
     };
-    setSubsidyDebug({
-      targetUrl: subsidyApiUrl,
-      requestUrl: subsidyRequestUrl,
-      method: 'POST',
-      body: requestBody,
-    });
     try {
       const result = await services.common.calculateSubsidy(requestBody);
 
@@ -317,7 +292,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
           ? error.message
           : subsidyCopy.errorGeneric;
       setSubsidyError(message);
-      setSubsidyDebug((prev) => (prev ? { ...prev, error: message } : prev));
       debugStore.push({
         id: makeId(),
         ts: Date.now(),
@@ -558,48 +532,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
                 <AlertCircle size={16} className="mt-0.5 shrink-0" />
                 <span>{subsidyError}</span>
               </div>
-            ) : null}
-
-            {subsidyDebug ? (
-              <details className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
-                <summary className="cursor-pointer text-xs font-black uppercase tracking-[0.22em] text-gray-600">
-                  Request Debug
-                </summary>
-                <div className="mt-3 space-y-3">
-                  <div className="rounded-2xl bg-white p-3 border border-gray-100">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gray-500">
-                      URL
-                    </p>
-                    <p className="mt-1 break-all text-xs text-gray-800">
-                      {subsidyDebug.targetUrl}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl bg-white p-3 border border-gray-100">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gray-500">
-                      Transport URL
-                    </p>
-                    <p className="mt-1 break-all text-xs text-gray-800">
-                      {subsidyDebug.requestUrl}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl bg-white p-3 border border-gray-100">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gray-500">
-                      Body
-                    </p>
-                    <pre className="mt-2 overflow-x-auto text-xs leading-6 text-gray-700">
-                      {JSON.stringify(subsidyDebug.body, null, 2)}
-                    </pre>
-                  </div>
-                  {subsidyDebug.error ? (
-                    <div className="rounded-2xl bg-white p-3 border border-red-100">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-red-500">
-                        Error
-                      </p>
-                      <p className="mt-1 text-xs text-red-700 break-words">{subsidyDebug.error}</p>
-                    </div>
-                  ) : null}
-                </div>
-              </details>
             ) : null}
 
             <Button
