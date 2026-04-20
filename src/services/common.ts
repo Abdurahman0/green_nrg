@@ -126,7 +126,7 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
 
 export const common = {
   calculateSubsidy: async (payload: SubsidyPayload): Promise<SubsidyCalculatorData> =>
-    request<SubsidyCalculatorData>('/api/common/public/subsidy-calculator/', {
+    request<SubsidyCalculatorData>('api/common/public/subsidy-calculator/', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
