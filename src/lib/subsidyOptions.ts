@@ -4,7 +4,7 @@ export interface SubsidyOption {
 }
 
 export const panelTypeOptions: SubsidyOption[] = [
-  { value: 'jinko_ja_solar', label: 'Jinko / JA Solar' },
+  { value: 'jinko_ja', label: 'Jinko / JA Solar' },
   { value: 'longi_hi_mo_x10', label: 'Longi HI MO X10' },
 ];
 

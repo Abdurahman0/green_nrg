@@ -35,58 +35,10 @@ interface SubsidyFormState {
 
 type SubsidyFormErrors = Partial<Record<keyof SubsidyFormState, string>>;
 
-const SUBSIDY_RESULT_KEY_PRIORITY = [
-  'subsidy_amount',
-  'subsidy',
-  'subsidy_percent',
-  'subsidy_kw',
-  'approved_subsidy',
-  'approved_subsidy_kw',
-  'calculated_subsidy',
-  'grant_amount',
-  'discount_amount',
-  'benefit_amount',
-  'approved_power_kw',
-  'requested_power_kw',
-  'audit_power_kw',
-  'payback_period',
-  'monthly_payment',
-  'status',
-  'message',
-] as const;
-
-const getPanelLabelKey = (value: string): 'jinkoJaSolar' | 'longiHiMoX10' => {
-  switch (value) {
-    case 'jinko_ja_solar':
-      return 'jinkoJaSolar';
-    default:
-      return 'longiHiMoX10';
-  }
-};
-
-const getInverterLabelKey = (
-  value: string
-): 'deye' | 'solax' => {
-  switch (value) {
-    case 'deye':
-      return 'deye';
-    default:
-      return 'solax';
-  }
-};
-
 const REQUESTED_POWER_PLACEHOLDER = {
   uz: 'Quvvatni tanlang',
   ru: 'Выберите мощность',
 } as const;
-
-const isPrimitive = (value: unknown): value is string | number | boolean =>
-  typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
-
-const humanizeKey = (key: string) =>
-  key
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase());
 
 const formatSubsidyValue = (value: unknown, lang: 'uz' | 'ru') => {
   if (value === null || value === undefined || value === '') return '—';
@@ -107,27 +59,6 @@ const formatSubsidyValue = (value: unknown, lang: 'uz' | 'ru') => {
   } catch {
     return String(value);
   }
-};
-
-const buildSubsidyRows = (result: Record<string, unknown>, lang: 'uz' | 'ru') => {
-  const prioritized = new Map<string, unknown>();
-  for (const key of SUBSIDY_RESULT_KEY_PRIORITY) {
-    const value = result[key];
-    if (isPrimitive(value)) prioritized.set(key, value);
-  }
-
-  for (const [key, value] of Object.entries(result)) {
-    if (prioritized.size >= 4) break;
-    if (!prioritized.has(key) && isPrimitive(value)) {
-      prioritized.set(key, value);
-    }
-  }
-
-  return Array.from(prioritized.entries()).slice(0, 4).map(([key, value]) => ({
-    key,
-    label: humanizeKey(key),
-    value: formatSubsidyValue(value, lang),
-  }));
 };
 
 const buildDocumentedSubsidyRows = (result: SubsidyCalculatorData, lang: 'uz' | 'ru') => {
@@ -158,7 +89,6 @@ const SUBSIDY_COPY = {
     panelType: 'Panel turi',
     inverterType: 'Invertor turi',
     requestedPower: "So'ralgan quvvat (kVt)",
-    auditPower: 'Audit quvvati (kVt)',
     panelPlaceholder: 'Panel turini tanlang',
     inverterPlaceholder: 'Invertor turini tanlang',
     calculate: 'Hisoblash',
@@ -187,7 +117,6 @@ const SUBSIDY_COPY = {
     panelType: 'Тип панели',
     inverterType: 'Тип инвертора',
     requestedPower: 'Запрашиваемая мощность (кВт)',
-    auditPower: 'Аудит мощность (кВт)',
     panelPlaceholder: 'Выберите тип панели',
     inverterPlaceholder: 'Выберите тип инвертора',
     calculate: 'Рассчитать',
