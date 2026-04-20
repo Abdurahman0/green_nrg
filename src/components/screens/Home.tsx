@@ -63,13 +63,29 @@ const formatSubsidyValue = (value: unknown, lang: 'uz' | 'ru') => {
 };
 
 const buildDocumentedSubsidyRows = (result: SubsidyCalculatorData, lang: 'uz' | 'ru') => {
+  const labels = {
+    uz: {
+      basePrice: 'Asosiy narx',
+      subsidyAmount: 'Subsidiya miqdori',
+      customerAmount: 'Mijoz to\'lovi',
+      subsidyReferencePower: 'Subsidiya uchun referens quvvat (kVt)',
+    },
+    ru: {
+      basePrice: 'Базовая цена',
+      subsidyAmount: 'Сумма субсидии',
+      customerAmount: 'Сумма к оплате',
+      subsidyReferencePower: 'Референсная мощность субсидии (кВт)',
+    },
+  } as const;
+
+  const copy = labels[lang];
   const rows = [
-    { key: 'base_price', label: 'Base Price', value: result.base_price },
-    { key: 'subsidy_amount', label: 'Subsidy Amount', value: result.subsidy_amount },
-    { key: 'customer_amount', label: 'Customer Amount', value: result.customer_amount },
+    { key: 'base_price', label: copy.basePrice, value: result.base_price },
+    { key: 'subsidy_amount', label: copy.subsidyAmount, value: result.subsidy_amount },
+    { key: 'customer_amount', label: copy.customerAmount, value: result.customer_amount },
     {
       key: 'subsidy_reference_power_kw',
-      label: 'Subsidy Reference Power (kW)',
+      label: copy.subsidyReferencePower,
       value: result.subsidy_reference_power_kw,
     },
   ];
@@ -94,9 +110,9 @@ const SUBSIDY_COPY = {
     inverterPlaceholder: 'Invertor turini tanlang',
     calculate: 'Hisoblash',
     calculating: 'Hisoblanmoqda...',
-    resultTitle: 'Natijalar',
-    resultSummary: 'Hisoblash natijalari',
-    resultFallback: "Natijalarni batafsil ko'rish",
+    resultTitle: 'Hisob natijalari',
+    resultSummary: 'Hisoblash bo‘yicha qisqa ma’lumot',
+    resultFallback: 'Natijalarni batafsil ko‘rish',
     errorRequired: 'Bu maydon majburiy.',
     errorPositive: '0 dan katta qiymat kiriting.',
     errorGeneric: "Hisoblashni bajarib bo'lmadi. Qayta urinib ko'ring.",
@@ -122,8 +138,8 @@ const SUBSIDY_COPY = {
     inverterPlaceholder: 'Выберите тип инвертора',
     calculate: 'Рассчитать',
     calculating: 'Расчёт...',
-    resultTitle: 'Результаты',
-    resultSummary: 'Параметры расчёта',
+    resultTitle: 'Результаты расчёта',
+    resultSummary: 'Краткая информация по расчёту',
     resultFallback: 'Подробный просмотр результатов',
     errorRequired: 'Это поле обязательно.',
     errorPositive: 'Введите значение больше 0.',
