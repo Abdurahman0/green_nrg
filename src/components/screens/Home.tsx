@@ -19,6 +19,7 @@ import { useI18n } from '@/lib/i18n';
 import { debugStore, makeId } from '@/lib/debugStore';
 import ReactCountryFlag from 'react-country-flag';
 import { services } from '@/services';
+import type { SubsidyCalculatorData } from '@/services/common';
 import {
   inverterTypeOptions,
   panelTypeOptions,
@@ -129,6 +130,27 @@ const buildSubsidyRows = (result: Record<string, unknown>, lang: 'uz' | 'ru') =>
   }));
 };
 
+const buildDocumentedSubsidyRows = (result: SubsidyCalculatorData, lang: 'uz' | 'ru') => {
+  const rows = [
+    { key: 'base_price', label: 'Base Price', value: result.base_price },
+    { key: 'subsidy_amount', label: 'Subsidy Amount', value: result.subsidy_amount },
+    { key: 'customer_amount', label: 'Customer Amount', value: result.customer_amount },
+    {
+      key: 'subsidy_reference_power_kw',
+      label: 'Subsidy Reference Power (kW)',
+      value: result.subsidy_reference_power_kw,
+    },
+  ];
+
+  return rows
+    .filter((row) => row.value !== undefined && row.value !== null && row.value !== '')
+    .map((row) => ({
+      key: row.key,
+      label: row.label,
+      value: formatSubsidyValue(row.value, lang),
+    }));
+};
+
 const SUBSIDY_COPY = {
   uz: {
     title: 'Subsidiya kalkulyatori',
@@ -207,7 +229,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
     requestedPowerKw: '',
   });
   const [subsidyErrors, setSubsidyErrors] = useState<SubsidyFormErrors>({});
-  const [subsidyResult, setSubsidyResult] = useState<Record<string, unknown> | null>(null);
+  const [subsidyResult, setSubsidyResult] = useState<SubsidyCalculatorData | null>(null);
   const [subsidyLoading, setSubsidyLoading] = useState(false);
   const [subsidyError, setSubsidyError] = useState<string | null>(null);
   const langMenuRef = useRef<HTMLDivElement | null>(null);
@@ -329,9 +351,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
       });
 
       if (result && typeof result === 'object' && !Array.isArray(result)) {
-        setSubsidyResult(result as Record<string, unknown>);
+        setSubsidyResult(result as SubsidyCalculatorData);
       } else {
-        setSubsidyResult({ result });
+        setSubsidyResult({ raw_result: result } as SubsidyCalculatorData);
       }
     } catch (error) {
       const message =
@@ -353,7 +375,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
 
   const subsidyRows =
     subsidyResult && typeof subsidyResult === 'object' && !Array.isArray(subsidyResult)
-      ? buildSubsidyRows(subsidyResult, lang)
+      ? buildDocumentedSubsidyRows(subsidyResult, lang)
       : [];
 
   if (loading) {

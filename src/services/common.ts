@@ -14,6 +14,14 @@ interface SubsidyPayload {
   audit_power_kw: number;
 }
 
+export interface SubsidyCalculatorData {
+  base_price?: string | number;
+  subsidy_amount?: string | number;
+  customer_amount?: string | number;
+  subsidy_reference_power_kw?: string | number;
+  [key: string]: unknown;
+}
+
 const API_BASE_URL = getApiBaseUrl();
 
 const unwrapData = <T>(payload: unknown): T => {
@@ -117,8 +125,8 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
 };
 
 export const common = {
-  calculateSubsidy: async (payload: SubsidyPayload): Promise<unknown> =>
-    request<unknown>('/api/common/public/subsidy-calculator/', {
+  calculateSubsidy: async (payload: SubsidyPayload): Promise<SubsidyCalculatorData> =>
+    request<SubsidyCalculatorData>('/api/common/public/subsidy-calculator/', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
