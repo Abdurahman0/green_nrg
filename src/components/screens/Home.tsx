@@ -14,20 +14,22 @@ import { BootstrapData, CatalogData, Product, Review } from '@/types';
 import { ProductCard } from '../ProductCard';
 import { Skeleton } from '../ui/skeleton';
 import { Button } from '../ui/button';
-import { Input } from '../ui/input';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { debugStore, makeId } from '@/lib/debugStore';
 import ReactCountryFlag from 'react-country-flag';
 import { services } from '@/services';
-import { inverterTypeOptions, panelTypeOptions } from '@/lib/subsidyOptions';
+import {
+  inverterTypeOptions,
+  panelTypeOptions,
+  requestedPowerOptions,
+} from '@/lib/subsidyOptions';
 import { StylishDropdown } from '@/components/ui/stylish-dropdown';
 
 interface SubsidyFormState {
   panelType: string;
   inverterType: string;
   requestedPowerKw: string;
-  auditPowerKw: string;
 }
 
 type SubsidyFormErrors = Partial<Record<keyof SubsidyFormState, string>>;
@@ -52,31 +54,30 @@ const SUBSIDY_RESULT_KEY_PRIORITY = [
   'message',
 ] as const;
 
-const getPanelLabelKey = (value: string): 'monocrystalline' | 'polycrystalline' | 'thinFilm' => {
+const getPanelLabelKey = (value: string): 'jinkoJaSolar' | 'longiHiMoX10' => {
   switch (value) {
-    case 'monocrystalline':
-      return 'monocrystalline';
-    case 'polycrystalline':
-      return 'polycrystalline';
+    case 'jinko_ja_solar':
+      return 'jinkoJaSolar';
     default:
-      return 'thinFilm';
+      return 'longiHiMoX10';
   }
 };
 
 const getInverterLabelKey = (
   value: string
-): 'string' | 'hybrid' | 'onGrid' | 'offGrid' => {
+): 'deye' | 'solax' => {
   switch (value) {
-    case 'hybrid':
-      return 'hybrid';
-    case 'on-grid':
-      return 'onGrid';
-    case 'off-grid':
-      return 'offGrid';
+    case 'deye':
+      return 'deye';
     default:
-      return 'string';
+      return 'solax';
   }
 };
+
+const REQUESTED_POWER_PLACEHOLDER = {
+  uz: 'Quvvatni tanlang',
+  ru: 'Выберите мощность',
+} as const;
 
 const isPrimitive = (value: unknown): value is string | number | boolean =>
   typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
@@ -204,7 +205,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
     panelType: '',
     inverterType: '',
     requestedPowerKw: '',
-    auditPowerKw: '',
   });
   const [subsidyErrors, setSubsidyErrors] = useState<SubsidyFormErrors>({});
   const [subsidyResult, setSubsidyResult] = useState<Record<string, unknown> | null>(null);
@@ -314,13 +314,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
       nextErrors.requestedPowerKw = subsidyCopy.errorPositive;
     }
 
-    const auditPowerKw = Number.parseFloat(subsidyForm.auditPowerKw);
-    if (!subsidyForm.auditPowerKw.trim()) {
-      nextErrors.auditPowerKw = subsidyCopy.errorRequired;
-    } else if (!Number.isFinite(auditPowerKw) || auditPowerKw <= 0) {
-      nextErrors.auditPowerKw = subsidyCopy.errorPositive;
-    }
-
     setSubsidyErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
       return;
@@ -332,7 +325,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
         panel_type: subsidyForm.panelType,
         inverter_type: subsidyForm.inverterType,
         requested_power_kw: requestedPowerKw,
-        audit_power_kw: auditPowerKw,
+        audit_power_kw: requestedPowerKw,
       });
 
       if (result && typeof result === 'object' && !Array.isArray(result)) {
@@ -564,75 +557,22 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
                 options={inverterTypeOptions.map((option) => ({
                   value: option.value,
                   label: subsidyCopy.inverter[getInverterLabelKey(option.value)],
-                }))}
+                }))} 
               />
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label
-                  htmlFor="subsidy-requested-power"
-                  className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500"
-                >
-                  {subsidyCopy.requestedPower}
-                </label>
-                <Input
-                  id="subsidy-requested-power"
-                  type="number"
-                  inputMode="decimal"
-                  min="0.1"
-                  step="0.1"
-                  value={subsidyForm.requestedPowerKw}
-                  onChange={(event) =>
-                    updateSubsidyField('requestedPowerKw', event.target.value)
-                  }
-                  aria-invalid={Boolean(subsidyErrors.requestedPowerKw)}
-                  placeholder="10"
-                  className={cn(
-                    'h-12 rounded-2xl border bg-gray-50 px-4 text-sm shadow-sm focus:border-primary/30 focus:ring-2 focus:ring-primary/20',
-                    subsidyErrors.requestedPowerKw
-                      ? 'border-red-300 focus:border-red-400 focus:ring-red-200'
-                      : 'border-gray-200'
-                  )}
-                />
-                {subsidyErrors.requestedPowerKw ? (
-                  <p className="text-xs font-medium text-red-600">
-                    {subsidyErrors.requestedPowerKw}
-                  </p>
-                ) : null}
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="subsidy-audit-power"
-                  className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500"
-                >
-                  {subsidyCopy.auditPower}
-                </label>
-                <Input
-                  id="subsidy-audit-power"
-                  type="number"
-                  inputMode="decimal"
-                  min="0.1"
-                  step="0.1"
-                  value={subsidyForm.auditPowerKw}
-                  onChange={(event) => updateSubsidyField('auditPowerKw', event.target.value)}
-                  aria-invalid={Boolean(subsidyErrors.auditPowerKw)}
-                  placeholder="10"
-                  className={cn(
-                    'h-12 rounded-2xl border bg-gray-50 px-4 text-sm shadow-sm focus:border-primary/30 focus:ring-2 focus:ring-primary/20',
-                    subsidyErrors.auditPowerKw
-                      ? 'border-red-300 focus:border-red-400 focus:ring-red-200'
-                      : 'border-gray-200'
-                  )}
-                />
-                {subsidyErrors.auditPowerKw ? (
-                  <p className="text-xs font-medium text-red-600">
-                    {subsidyErrors.auditPowerKw}
-                  </p>
-                ) : null}
-              </div>
-            </div>
+            <StylishDropdown
+              id="subsidy-requested-power"
+              label={subsidyCopy.requestedPower}
+              placeholder={REQUESTED_POWER_PLACEHOLDER[lang]}
+              value={subsidyForm.requestedPowerKw}
+              onChange={(value) => updateSubsidyField('requestedPowerKw', value)}
+              error={subsidyErrors.requestedPowerKw}
+              options={requestedPowerOptions.map((option) => ({
+                value: option.value,
+                label: option.value,
+              }))}
+            />
 
             {subsidyError ? (
               <div className="flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
