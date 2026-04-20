@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   AlertCircle,
   Calculator,
-  ChevronDown,
   Loader2,
   PackageCheck,
   Search,
@@ -21,6 +20,8 @@ import { useI18n } from '@/lib/i18n';
 import { debugStore, makeId } from '@/lib/debugStore';
 import ReactCountryFlag from 'react-country-flag';
 import { services } from '@/services';
+import { inverterTypeOptions, panelTypeOptions } from '@/lib/subsidyOptions';
+import { StylishDropdown } from '@/components/ui/stylish-dropdown';
 
 interface SubsidyFormState {
   panelType: string;
@@ -30,32 +31,6 @@ interface SubsidyFormState {
 }
 
 type SubsidyFormErrors = Partial<Record<keyof SubsidyFormState, string>>;
-
-const PANEL_TYPE_OPTIONS = [
-  { value: 'monocrystalline', labelKey: 'home.subsidy.panel.monocrystalline' },
-  { value: 'polycrystalline', labelKey: 'home.subsidy.panel.polycrystalline' },
-  { value: 'thin-film', labelKey: 'home.subsidy.panel.thinFilm' },
-] as const;
-
-const PANEL_TYPE_LABEL_KEYS = {
-  monocrystalline: 'monocrystalline',
-  polycrystalline: 'polycrystalline',
-  'thin-film': 'thinFilm',
-} as const;
-
-const INVERTER_TYPE_OPTIONS = [
-  { value: 'string', labelKey: 'home.subsidy.inverter.string' },
-  { value: 'hybrid', labelKey: 'home.subsidy.inverter.hybrid' },
-  { value: 'on-grid', labelKey: 'home.subsidy.inverter.onGrid' },
-  { value: 'off-grid', labelKey: 'home.subsidy.inverter.offGrid' },
-] as const;
-
-const INVERTER_TYPE_LABEL_KEYS = {
-  string: 'string',
-  hybrid: 'hybrid',
-  'on-grid': 'onGrid',
-  'off-grid': 'offGrid',
-} as const;
 
 const SUBSIDY_RESULT_KEY_PRIORITY = [
   'subsidy_amount',
@@ -76,6 +51,32 @@ const SUBSIDY_RESULT_KEY_PRIORITY = [
   'status',
   'message',
 ] as const;
+
+const getPanelLabelKey = (value: string): 'monocrystalline' | 'polycrystalline' | 'thinFilm' => {
+  switch (value) {
+    case 'monocrystalline':
+      return 'monocrystalline';
+    case 'polycrystalline':
+      return 'polycrystalline';
+    default:
+      return 'thinFilm';
+  }
+};
+
+const getInverterLabelKey = (
+  value: string
+): 'string' | 'hybrid' | 'onGrid' | 'offGrid' => {
+  switch (value) {
+    case 'hybrid':
+      return 'hybrid';
+    case 'on-grid':
+      return 'onGrid';
+    case 'off-grid':
+      return 'offGrid';
+    default:
+      return 'string';
+  }
+};
 
 const isPrimitive = (value: unknown): value is string | number | boolean =>
   typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
@@ -540,83 +541,31 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
 
           <form className="mt-5 space-y-4" onSubmit={handleSubsidySubmit}>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label
-                  htmlFor="subsidy-panel-type"
-                  className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500"
-                >
-                  {subsidyCopy.panelType}
-                </label>
-                <div className="relative">
-                  <select
-                    id="subsidy-panel-type"
-                    value={subsidyForm.panelType}
-                    onChange={(event) =>
-                      updateSubsidyField('panelType', event.target.value)
-                    }
-                    aria-invalid={Boolean(subsidyErrors.panelType)}
-                    className={cn(
-                      'w-full appearance-none rounded-2xl border bg-gray-50 px-4 py-3.5 pr-11 text-sm text-gray-900 shadow-sm outline-none transition-all focus:border-primary/30 focus:ring-2 focus:ring-primary/20',
-                      subsidyErrors.panelType
-                        ? 'border-red-300 focus:border-red-400 focus:ring-red-200'
-                        : 'border-gray-200'
-                    )}
-                  >
-                    <option value="">{subsidyCopy.panelPlaceholder}</option>
-                    {PANEL_TYPE_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {subsidyCopy.panel[PANEL_TYPE_LABEL_KEYS[option.value]]}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    size={16}
-                    className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-                  />
-                </div>
-                {subsidyErrors.panelType ? (
-                  <p className="text-xs font-medium text-red-600">{subsidyErrors.panelType}</p>
-                ) : null}
-              </div>
+              <StylishDropdown
+                id="subsidy-panel-type"
+                label={subsidyCopy.panelType}
+                placeholder={subsidyCopy.panelPlaceholder}
+                value={subsidyForm.panelType}
+                onChange={(value) => updateSubsidyField('panelType', value)}
+                error={subsidyErrors.panelType}
+                options={panelTypeOptions.map((option) => ({
+                  value: option.value,
+                  label: subsidyCopy.panel[getPanelLabelKey(option.value)],
+                }))}
+              />
 
-              <div className="space-y-2">
-                <label
-                  htmlFor="subsidy-inverter-type"
-                  className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500"
-                >
-                  {subsidyCopy.inverterType}
-                </label>
-                <div className="relative">
-                  <select
-                    id="subsidy-inverter-type"
-                    value={subsidyForm.inverterType}
-                    onChange={(event) =>
-                      updateSubsidyField('inverterType', event.target.value)
-                    }
-                    aria-invalid={Boolean(subsidyErrors.inverterType)}
-                    className={cn(
-                      'w-full appearance-none rounded-2xl border bg-gray-50 px-4 py-3.5 pr-11 text-sm text-gray-900 shadow-sm outline-none transition-all focus:border-primary/30 focus:ring-2 focus:ring-primary/20',
-                      subsidyErrors.inverterType
-                        ? 'border-red-300 focus:border-red-400 focus:ring-red-200'
-                        : 'border-gray-200'
-                    )}
-                  >
-                    <option value="">{subsidyCopy.inverterPlaceholder}</option>
-                    {INVERTER_TYPE_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {subsidyCopy.inverter[INVERTER_TYPE_LABEL_KEYS[option.value]]}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    size={16}
-                    className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-                  />
-                </div>
-                {subsidyErrors.inverterType ? (
-                  <p className="text-xs font-medium text-red-600">{subsidyErrors.inverterType}</p>
-                ) : null}
-              </div>
+              <StylishDropdown
+                id="subsidy-inverter-type"
+                label={subsidyCopy.inverterType}
+                placeholder={subsidyCopy.inverterPlaceholder}
+                value={subsidyForm.inverterType}
+                onChange={(value) => updateSubsidyField('inverterType', value)}
+                error={subsidyErrors.inverterType}
+                options={inverterTypeOptions.map((option) => ({
+                  value: option.value,
+                  label: subsidyCopy.inverter[getInverterLabelKey(option.value)],
+                }))}
+              />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
