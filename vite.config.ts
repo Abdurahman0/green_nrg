@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
       ? env.VITE_ALLOWED_HOSTS.split(',').map((host) => host.trim()).filter(Boolean)
       : []),
   ];
-  const proxyTarget = env.VITE_API_PROXY_TARGET?.trim();
+  const proxyTarget = env.VITE_API_PROXY_TARGET?.trim() || 'https://solar.api.cognilabs.org';
 
   return {
     plugins: [react(), tailwindcss()],
@@ -26,10 +26,20 @@ export default defineConfig(({ mode }) => {
       allowedHosts,
       proxy: proxyTarget
         ? {
-            '/api': {
+            '/api/telegram-webapp': {
               target: proxyTarget,
               changeOrigin: true,
               secure: false,
+              rewrite: (path) => {
+                if (path === '/api/telegram-webapp/common/public/subsidy-calculator/') {
+                  return '/api/common/public/subsidy-calculator/';
+                }
+
+                return path.replace(
+                  /^\/api\/telegram-webapp\/?/,
+                  '/api/integrations/telegram/webapp/'
+                );
+              },
             },
           }
         : undefined,

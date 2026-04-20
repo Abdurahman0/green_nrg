@@ -24,6 +24,8 @@ export interface SubsidyCalculatorData {
 
 const API_BASE_URL = getApiBaseUrl();
 export const SUBSIDY_CALCULATOR_PATH = '/api/common/public/subsidy-calculator/';
+export const SUBSIDY_CALCULATOR_PROXY_PATH =
+  '/api/telegram-webapp/common/public/subsidy-calculator/';
 
 const unwrapData = <T>(payload: unknown): T => {
   if (payload && typeof payload === 'object' && 'data' in payload) {
@@ -127,9 +129,95 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
 };
 
 export const common = {
-  calculateSubsidy: async (payload: SubsidyPayload): Promise<SubsidyCalculatorData> =>
-    request<SubsidyCalculatorData>(SUBSIDY_CALCULATOR_PATH, {
+  calculateSubsidy: async (payload: SubsidyPayload): Promise<SubsidyCalculatorData> => {
+    const headers = new Headers();
+    headers.set('Content-Type', 'application/json');
+
+    const url = SUBSIDY_CALCULATOR_PROXY_PATH;
+    const requestId = makeId();
+    debugStore.push({
+      id: requestId,
+      ts: Date.now(),
+      kind: 'http',
+      phase: 'start',
       method: 'POST',
-      body: JSON.stringify(payload),
-    }),
+      url,
+      initDataLength: 0,
+    });
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+        credentials: 'include',
+      });
+    } catch (err) {
+      debugStore.push({
+        id: makeId(),
+        ts: Date.now(),
+        kind: 'http',
+        phase: 'error',
+        method: 'POST',
+        url,
+        error: err instanceof Error ? err.message : String(err),
+        initDataLength: 0,
+      });
+      throw err;
+    }
+
+    let payloadData: unknown = null;
+    let rawText = '';
+    try {
+      rawText = await response.text();
+      payloadData = rawText ? JSON.parse(rawText) : null;
+    } catch {
+      payloadData = null;
+    }
+
+    if (!response.ok) {
+      const snippet = rawText ? rawText.slice(0, 220).replace(/\s+/g, ' ').trim() : '';
+      debugStore.push({
+        id: makeId(),
+        ts: Date.now(),
+        kind: 'http',
+        phase: 'end',
+        method: 'POST',
+        url,
+        status: response.status,
+        ok: false,
+        initDataLength: 0,
+        error: snippet ? `HTTP ${response.status}: ${snippet}` : `HTTP ${response.status}`,
+      });
+
+      const message =
+        (payloadData &&
+          typeof payloadData === 'object' &&
+          'detail' in payloadData &&
+          typeof (payloadData as { detail?: unknown }).detail === 'string' &&
+          (payloadData as { detail: string }).detail) ||
+        (payloadData &&
+          typeof payloadData === 'object' &&
+          'message' in payloadData &&
+          typeof (payloadData as { message?: unknown }).message === 'string' &&
+          (payloadData as { message: string }).message) ||
+        `Request failed: ${response.status}`;
+      throw new Error(message);
+    }
+
+    debugStore.push({
+      id: makeId(),
+      ts: Date.now(),
+      kind: 'http',
+      phase: 'end',
+      method: 'POST',
+      url,
+      status: response.status,
+      ok: true,
+      initDataLength: 0,
+    });
+
+    return unwrapData<SubsidyCalculatorData>(payloadData);
+  },
 };

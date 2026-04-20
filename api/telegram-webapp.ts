@@ -16,9 +16,11 @@ export default async function handler(req: any, res: any) {
   const url = new URL(req.url || '', 'http://localhost');
   const path = (url.searchParams.get('path') || '').replace(/^\/+/, '');
   const upstreamPath = path ? `/${path}` : '/';
-
+  const isSubsidyCalculator = upstreamPath === '/common/public/subsidy-calculator/';
   const upstreamUrl = new URL(
-    `/api/integrations/telegram/webapp${upstreamPath}`,
+    isSubsidyCalculator
+      ? '/api/common/public/subsidy-calculator/'
+      : `/api/integrations/telegram/webapp${upstreamPath}`,
     BACKEND_BASE
   );
 

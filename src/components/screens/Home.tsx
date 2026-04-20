@@ -17,11 +17,13 @@ import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { debugStore, makeId } from '@/lib/debugStore';
-import { getApiBaseUrl } from '@/config';
 import ReactCountryFlag from 'react-country-flag';
 import { services } from '@/services';
 import type { SubsidyCalculatorData } from '@/services/common';
-import { SUBSIDY_CALCULATOR_PATH } from '@/services/common';
+import {
+  SUBSIDY_CALCULATOR_PATH,
+  SUBSIDY_CALCULATOR_PROXY_PATH,
+} from '@/services/common';
 import {
   inverterTypeOptions,
   panelTypeOptions,
@@ -36,7 +38,8 @@ interface SubsidyFormState {
 }
 
 interface SubsidyRequestDebug {
-  url: string;
+  targetUrl: string;
+  requestUrl: string;
   method: 'POST';
   body: {
     panel_type: string;
@@ -178,7 +181,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
   const [subsidyDebug, setSubsidyDebug] = useState<SubsidyRequestDebug | null>(null);
   const langMenuRef = useRef<HTMLDivElement | null>(null);
   const subsidyCopy = SUBSIDY_COPY[lang];
-  const subsidyApiUrl = `${getApiBaseUrl()}${SUBSIDY_CALCULATOR_PATH}`;
+  const subsidyApiUrl = `https://solar.api.cognilabs.org${SUBSIDY_CALCULATOR_PATH}`;
+  const subsidyRequestUrl = SUBSIDY_CALCULATOR_PROXY_PATH;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -294,7 +298,8 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
       audit_power_kw: requestedPowerKw,
     };
     setSubsidyDebug({
-      url: subsidyApiUrl,
+      targetUrl: subsidyApiUrl,
+      requestUrl: subsidyRequestUrl,
       method: 'POST',
       body: requestBody,
     });
@@ -565,7 +570,17 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
                     <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gray-500">
                       URL
                     </p>
-                    <p className="mt-1 break-all text-xs text-gray-800">{subsidyDebug.url}</p>
+                    <p className="mt-1 break-all text-xs text-gray-800">
+                      {subsidyDebug.targetUrl}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl bg-white p-3 border border-gray-100">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gray-500">
+                      Transport URL
+                    </p>
+                    <p className="mt-1 break-all text-xs text-gray-800">
+                      {subsidyDebug.requestUrl}
+                    </p>
                   </div>
                   <div className="rounded-2xl bg-white p-3 border border-gray-100">
                     <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gray-500">
