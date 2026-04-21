@@ -41,17 +41,17 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
       className="fixed inset-0 z-[100] bg-white flex flex-col min-h-0"
     >
       {/* Header Actions */}
-      <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10">
+      <div className="fixed top-0 left-0 right-0 z-[150] p-6 flex justify-between items-center pointer-events-none">
         <button 
           onClick={onClose}
-          className="p-3 bg-white/80 backdrop-blur-md rounded-2xl shadow-sm text-gray-900 border border-gray-100"
+          className="pointer-events-auto p-3 bg-white/80 backdrop-blur-md rounded-2xl shadow-sm text-gray-900 border border-gray-100"
         >
           <X size={20} />
         </button>
         <div className="flex gap-3">
           <button 
             onClick={() => toggleFavorite(product.id)}
-            className="p-3 rounded-2xl shadow-sm backdrop-blur-md border transition-all bg-white/80 border-gray-100 text-gray-900 hover:border-red-300 hover:shadow-red-500/10"
+            className="pointer-events-auto p-3 rounded-2xl shadow-sm backdrop-blur-md border transition-all bg-white/80 border-gray-100 text-gray-900 hover:border-red-300 hover:shadow-red-500/10"
           >
             <motion.div
               animate={{ scale: isFav ? [1, 1.3, 1] : 1 }}
