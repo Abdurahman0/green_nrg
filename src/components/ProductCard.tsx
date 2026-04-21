@@ -125,11 +125,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
         
-        <div className="p-4 pt-3">
-          <div className="mb-1.5 min-h-5 flex items-center">
+        <div className="p-4 pt-2.5">
+          <div className="mb-1 min-h-4 flex items-center">
             {pricing.isRecommended ? (
               <Badge className={cn(
-                "inline-flex h-5 max-w-full items-center rounded-full bg-primary px-2.5 font-bold uppercase tracking-[0.05em] text-white shadow-sm",
+                "inline-flex h-5 max-w-full items-center rounded-full bg-primary px-2.5 font-bold uppercase tracking-[0.045em] text-white shadow-sm",
                 recommendedBadgeTextSize
               )}>
                 <span className="whitespace-nowrap">{recommendedBadgeText}</span>
@@ -138,7 +138,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               <Badge
                 aria-hidden="true"
                 className={cn(
-                  "invisible inline-flex h-5 max-w-full items-center rounded-full bg-primary px-2.5 font-bold uppercase tracking-[0.05em] text-white shadow-sm",
+                  "invisible inline-flex h-5 max-w-full items-center rounded-full bg-primary px-2.5 font-bold uppercase tracking-[0.045em] text-white shadow-sm",
                   recommendedBadgeTextSize
                 )}
               >
@@ -148,16 +148,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
 
           <h3 
-            className="font-semibold text-gray-900 text-sm line-clamp-2 min-h-[2.5rem] cursor-pointer hover:text-primary transition-colors"
+            className="font-semibold text-gray-900 text-sm line-clamp-2 min-h-[2.25rem] cursor-pointer hover:text-primary transition-colors"
             onClick={() => onClick?.(product)}
           >
             {product.name}
           </h3>
           
-          <div className="mt-2">
-            <div className="flex min-w-0 flex-col min-h-[4rem]">
+          <div className="mt-1.5">
+            <div className="flex min-w-0 flex-col min-h-[3.5rem]">
               <span className="text-xs text-gray-400 font-medium uppercase tracking-tight">{t('product.price')}</span>
-              <div className="mt-0.5 space-y-0.5">
+              <div className="mt-[2px] space-y-[2px]">
                 {pricing.hasSubsidy ? (
                   <>
                     <div className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5 text-red-500 leading-none tabular-nums tracking-tight">
@@ -180,7 +180,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               </div>
             </div>
 
-            <div className="mt-2 h-10 flex items-center justify-end">
+            <div className="mt-1.5 h-10 flex items-center justify-end">
               {quantity > 0 ? (
                 <div className="flex shrink-0 items-center gap-1 rounded-lg bg-primary/10 px-2 py-1">
                   <Button
