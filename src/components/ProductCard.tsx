@@ -39,6 +39,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const basePriceParts = formatUZSParts(pricing.basePrice, lang);
   const finalPriceParts = formatUZSParts(pricing.priceAfterSubsidy, lang);
   const recommendedBadgeText = t('product.recommendedBadge');
+  const recommendedBadgeShortText = t('product.recommendedBadgeShort');
   const recommendedBadgeTextSize = lang === 'ru' ? 'text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-[10px]';
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -108,13 +109,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             )}
           </button>
           
-          {!compactBadges && pricing.hasSubsidy ? (
-            <div className="absolute left-3 top-3 flex flex-wrap gap-2 pr-14">
-              <Badge className="h-6 rounded-full bg-emerald-50 text-emerald-700 shadow-sm">
+          <div className="absolute left-3 top-3 flex max-w-[calc(100%-5.5rem)] flex-col gap-1">
+            {pricing.isRecommended ? (
+              <Badge
+                title={recommendedBadgeText}
+                className={cn(
+                  "inline-flex h-5 max-w-full items-center rounded-full bg-primary px-2 font-bold uppercase tracking-[0.04em] text-white shadow-sm",
+                  recommendedBadgeTextSize
+                )}
+              >
+                <span className="whitespace-nowrap">{recommendedBadgeShortText}</span>
+              </Badge>
+            ) : null}
+            {!compactBadges && pricing.hasSubsidy ? (
+              <Badge className="h-5 rounded-full bg-emerald-50 px-2 text-[8px] font-bold uppercase tracking-[0.04em] text-emerald-700 shadow-sm sm:text-[9px]">
                 {t('product.subsidyBadge')}
               </Badge>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
 
           {(product.category?.name ?? product.category_name ?? product.category__name) && (
             <div className="absolute bottom-3 left-3">
@@ -126,36 +138,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
         
         <div className="px-4 pb-4 pt-0">
-          <div className="mb-0.5 min-h-4 flex items-center">
-            {pricing.isRecommended ? (
-              <Badge className={cn(
-                "inline-flex h-5 max-w-full items-center rounded-full bg-primary px-2.5 font-bold uppercase tracking-[0.045em] text-white shadow-sm",
-                recommendedBadgeTextSize
-              )}>
-                <span className="whitespace-nowrap">{recommendedBadgeText}</span>
-              </Badge>
-            ) : (
-              <Badge
-                aria-hidden="true"
-                className={cn(
-                  "invisible inline-flex h-5 max-w-full items-center rounded-full bg-primary px-2.5 font-bold uppercase tracking-[0.045em] text-white shadow-sm",
-                  recommendedBadgeTextSize
-                )}
-              >
-                <span className="whitespace-nowrap">{recommendedBadgeText}</span>
-              </Badge>
-            )}
-          </div>
-
           <h3 
-            className="mt-1 font-semibold text-gray-900 text-sm line-clamp-2 min-h-[2.25rem] cursor-pointer hover:text-primary transition-colors"
+            className="mt-0.5 font-semibold text-gray-900 text-sm line-clamp-2 min-h-[2.25rem] cursor-pointer hover:text-primary transition-colors"
             onClick={() => onClick?.(product)}
           >
             {product.name}
           </h3>
           
-          <div className="mt-1">
-            <div className="flex min-w-0 flex-col min-h-[3.1rem]">
+          <div className="mt-0.5">
+            <div className="flex min-w-0 flex-col min-h-[2.95rem]">
               <span className="text-xs text-gray-400 font-medium uppercase tracking-tight">{t('product.price')}</span>
               <div className="mt-[2px] space-y-[2px]">
                 {pricing.hasSubsidy ? (
@@ -180,7 +171,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               </div>
             </div>
 
-            <div className="mt-0 h-8 flex items-center justify-end">
+            <div className="mt-0 flex items-center justify-end">
               {quantity > 0 ? (
                 <div className="flex shrink-0 items-center gap-1 rounded-lg bg-primary/10 px-2 py-0.5">
                   <Button

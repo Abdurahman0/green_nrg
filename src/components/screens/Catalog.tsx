@@ -171,6 +171,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                   const basePriceParts = formatUZSParts(pricing.basePrice, lang);
                   const finalPriceParts = formatUZSParts(pricing.priceAfterSubsidy, lang);
                   const recommendedBadgeText = t('product.recommendedBadge');
+                  const recommendedBadgeShortText = t('product.recommendedBadgeShort');
                   const recommendedBadgeTextSize = lang === 'ru' ? 'text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-[10px]';
 
                   return viewMode === 'grid' ? (
@@ -196,32 +197,25 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                             <ImageOff size={18} />
                           </div>
                         )}
+                        {product.is_recommended ? (
+                          <div className="absolute left-2 top-2">
+                            <span
+                              title={recommendedBadgeText}
+                              className={cn(
+                                "inline-flex h-5 items-center rounded-full bg-primary px-2 font-bold uppercase tracking-[0.04em] text-white shadow-sm",
+                                recommendedBadgeTextSize
+                              )}
+                            >
+                              {recommendedBadgeShortText}
+                            </span>
+                          </div>
+                        ) : null}
                       </div>
                       <div className="flex flex-col justify-between py-1 flex-1 min-w-0">
                         <div>
                           <span className="text-[10px] font-bold text-primary uppercase tracking-widest">
                             {product.category?.name ?? product.category_name ?? product.category__name}
                           </span>
-                          <div className="mt-1 min-h-6 flex items-center">
-                            {product.is_recommended ? (
-                              <span className={cn(
-                                "inline-flex h-6 max-w-full items-center rounded-full bg-primary px-3 font-bold uppercase tracking-[0.06em] text-white shadow-sm",
-                                recommendedBadgeTextSize
-                              )}>
-                                <span className="whitespace-nowrap">{recommendedBadgeText}</span>
-                              </span>
-                            ) : (
-                              <span
-                                aria-hidden="true"
-                                className={cn(
-                                  "invisible inline-flex h-6 max-w-full items-center rounded-full bg-primary px-3 font-bold uppercase tracking-[0.06em] text-white shadow-sm",
-                                  recommendedBadgeTextSize
-                                )}
-                              >
-                                <span className="whitespace-nowrap">{recommendedBadgeText}</span>
-                              </span>
-                            )}
-                          </div>
                           <h3 className="font-bold text-gray-900 text-sm line-clamp-1 mt-0.5">
                             {product.name}
                           </h3>
