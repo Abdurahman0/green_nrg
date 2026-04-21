@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { Product } from '../types';
+import { getProductPricing } from './productSubsidy';
 
 interface CartItem extends Product {
   quantity: number;
@@ -104,6 +105,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [items]);
 
   const addToCart = (product: Product) => {
+    const pricing = getProductPricing(product);
     setItems(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
@@ -111,7 +113,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product, price: pricing.priceAfterSubsidy, quantity: 1 }];
     });
   };
 

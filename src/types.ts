@@ -26,6 +26,10 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  subsidy_enabled?: boolean;
+  subsidy_amount?: number;
+  price_after_subsidy?: number;
+  is_recommended?: boolean;
   /** Full category object (new API) */
   category?: Category;
   /** Backward-compat: category_name flat field (new API) */
@@ -37,6 +41,7 @@ export interface Product {
   primary_image_url?: string;
   is_promoted?: boolean;
   stock_quantity?: number;
+  images?: string[];
   image_urls?: string[];
 }
 
@@ -79,7 +84,10 @@ export interface CatalogData {
   brands: string[];
   products: Product[];
   promoted_products: Product[];
+  recommended_products: Product[];
 }
+
+export type CatalogSort = 'price_asc' | 'price_desc' | 'cheap_first' | 'expensive_first';
 
 export interface CategoryDetail {
   category: Category;

@@ -3,6 +3,7 @@ import { Heart, Plus, Minus } from 'lucide-react';
 import { Product } from '../types';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
+import { Badge } from './ui/badge';
 import { useCart } from '@/lib/CartContext';
 import { useFavorites } from '@/lib/FavoritesContext';
 import { dispatchCartFlyFromElement } from '@/lib/cartFly';
@@ -10,6 +11,7 @@ import { useI18n } from '@/lib/i18n';
 import { getProductImage } from '@/lib/productMedia';
 import { ImageOff } from 'lucide-react';
 import { formatUZSParts } from '@/lib/money';
+import { getProductPricing } from '@/lib/productSubsidy';
 
 interface ProductCardProps {
   product: Product;
@@ -29,7 +31,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const quantity = cartItem?.quantity || 0;
   const isFav = isFavorite(product.id);
   const productImage = getProductImage(product);
-  const priceParts = formatUZSParts(product.price, lang);
+  const pricing = getProductPricing(product);
+  const basePriceParts = formatUZSParts(pricing.basePrice, lang);
+  const finalPriceParts = formatUZSParts(pricing.priceAfterSubsidy, lang);
+  const subsidyParts = formatUZSParts(pricing.subsidyAmount, lang);
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     dispatchCartFlyFromElement(e.currentTarget, productImage);
@@ -90,6 +95,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             />
           </button>
           
+          <div className="absolute left-3 top-3 flex flex-wrap gap-2 pr-14">
+            {pricing.isRecommended ? (
+              <Badge className="h-6 rounded-full bg-primary text-white shadow-sm">
+                {t('product.recommendedBadge')}
+              </Badge>
+            ) : null}
+            {pricing.hasSubsidy ? (
+              <Badge className="h-6 rounded-full bg-emerald-50 text-emerald-700 shadow-sm">
+                {t('product.subsidyBadge')}
+              </Badge>
+            ) : null}
+          </div>
+
           {(product.category?.name ?? product.category_name ?? product.category__name) && (
             <div className="absolute bottom-3 left-3">
               <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-white/90 text-primary rounded-md">
@@ -110,10 +128,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <div className="mt-3">
             <div className="flex min-w-0 flex-col">
               <span className="text-xs text-gray-400 font-medium uppercase tracking-tight">{t('product.price')}</span>
-              <span className="mt-0.5 flex flex-wrap items-baseline gap-x-1 gap-y-0.5 text-primary leading-none tabular-nums tracking-tight">
-                <span className="font-extrabold text-[clamp(0.95rem,3.8vw,1.125rem)]">{priceParts.amount}</span>
-                <span className="text-[10px] font-bold text-primary/80 uppercase tracking-widest">{priceParts.currency}</span>
-              </span>
+              {pricing.hasSubsidy ? (
+                <div className="mt-1 space-y-1">
+                  <div className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5 text-red-500 leading-none tabular-nums tracking-tight">
+                    <span className="text-xs font-semibold line-through">{basePriceParts.amount}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">{basePriceParts.currency}</span>
+                  </div>
+                  <span className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5 text-primary leading-none tabular-nums tracking-tight">
+                    <span className="font-extrabold text-[clamp(0.95rem,3.8vw,1.125rem)]">{finalPriceParts.amount}</span>
+                    <span className="text-[10px] font-bold text-primary/80 uppercase tracking-widest">{finalPriceParts.currency}</span>
+                  </span>
+                  <div className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-700">
+                    <span>{t('product.subsidyAmount')}</span>
+                    <span className="tabular-nums">{subsidyParts.amount}</span>
+                  </div>
+                </div>
+              ) : (
+                <span className="mt-0.5 flex flex-wrap items-baseline gap-x-1 gap-y-0.5 text-primary leading-none tabular-nums tracking-tight">
+                  <span className="font-extrabold text-[clamp(0.95rem,3.8vw,1.125rem)]">{basePriceParts.amount}</span>
+                  <span className="text-[10px] font-bold text-primary/80 uppercase tracking-widest">{basePriceParts.currency}</span>
+                </span>
+              )}
             </div>
 
             <div className="mt-2 h-10 flex items-center justify-end">

@@ -1,6 +1,7 @@
 import {
   BootstrapData,
   CatalogData,
+  CatalogSort,
   Category,
   CategoryDetail,
   CheckoutPayload,
@@ -173,10 +174,38 @@ const normalizeProduct = (product: Record<string, unknown>): Product => {
     category = normalizeCategory(product.category as Record<string, unknown>);
   }
 
+  const imageRows = Array.isArray(product.images)
+    ? product.images
+    : Array.isArray(product.image_urls)
+      ? product.image_urls
+      : [];
+  const images = imageRows
+    .map((entry) => {
+      if (typeof entry === 'string') return entry;
+      if (!entry || typeof entry !== 'object') return '';
+      const record = entry as Record<string, unknown>;
+      const candidates = [record.url, record.image_url, record.image, record.src];
+      const found = candidates.find((value) => typeof value === 'string' && value.trim());
+      return typeof found === 'string' ? found : '';
+    })
+    .filter((value) => typeof value === 'string' && value.trim())
+    .map((value) => String(value));
+
+  const subsidyEnabled = typeof product.subsidy_enabled === 'boolean'
+    ? product.subsidy_enabled
+    : undefined;
+  const subsidyAmount = product.subsidy_amount !== undefined ? toNumber(product.subsidy_amount) : undefined;
+  const priceAfterSubsidy =
+    product.price_after_subsidy !== undefined ? toNumber(product.price_after_subsidy) : undefined;
+
   return {
     id: String(product.id ?? ''),
     name: String(product.name ?? ''),
     price: toNumber(product.price),
+    subsidy_enabled: subsidyEnabled,
+    subsidy_amount: subsidyAmount,
+    price_after_subsidy: priceAfterSubsidy,
+    is_recommended: typeof product.is_recommended === 'boolean' ? product.is_recommended : undefined,
     category,
     category_name:
       typeof product.category_name === 'string' ? product.category_name : undefined,
@@ -191,9 +220,8 @@ const normalizeProduct = (product: Record<string, unknown>): Product => {
     is_promoted: typeof product.is_promoted === 'boolean' ? product.is_promoted : undefined,
     stock_quantity:
       product.stock_quantity !== undefined ? toNumber(product.stock_quantity) : undefined,
-    image_urls: Array.isArray(product.image_urls)
-      ? product.image_urls.map((u) => String(u))
-      : undefined,
+    images: images.length ? images : undefined,
+    image_urls: images.length ? images : undefined,
   };
 };
 
@@ -278,20 +306,27 @@ export const api = {
     };
   },
 
-  getCatalog: async (categoryFilter?: string): Promise<CatalogData> => {
-    const qs = categoryFilter ? `?category=${encodeURIComponent(categoryFilter)}` : '';
+  getCatalog: async (categoryFilter?: string, sort?: CatalogSort): Promise<CatalogData> => {
+    const params = new URLSearchParams();
+    if (categoryFilter) params.set('category', categoryFilter);
+    if (sort) params.set('sort', sort);
+    const qs = params.toString() ? `?${params.toString()}` : '';
     const raw = await request<unknown>(`/catalog/${qs}`);
     const data = asRecord(raw);
     const categoriesRaw = Array.isArray(data.categories) ? data.categories : [];
     const brandsRaw = Array.isArray(data.brands) ? data.brands : [];
     const productsRaw = Array.isArray(data.products) ? data.products : [];
     const promotedRaw = Array.isArray(data.promoted_products) ? data.promoted_products : [];
+    const recommendedRaw = Array.isArray(data.recommended_products) ? data.recommended_products : [];
 
     return {
       categories: categoriesRaw.map((item) => normalizeCategory(asRecord(item))),
       brands: brandsRaw.map((item) => String(item ?? '')),
       products: productsRaw.map((item) => normalizeProduct(item as Record<string, unknown>)),
       promoted_products: promotedRaw.map((item) =>
+        normalizeProduct(item as Record<string, unknown>)
+      ),
+      recommended_products: recommendedRaw.map((item) =>
         normalizeProduct(item as Record<string, unknown>)
       ),
     };

@@ -9,6 +9,7 @@ import { useFavorites } from '@/lib/FavoritesContext';
 import { useI18n } from '@/lib/i18n';
 import { getProductImages } from '@/lib/productMedia';
 import { formatUZSParts } from '@/lib/money';
+import { getProductPricing } from '@/lib/productSubsidy';
 
 interface ProductDetailProps {
   product: Product;
@@ -26,7 +27,10 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
   const isFav = isFavorite(product.id);
   const productImages = useMemo(() => getProductImages(product, 3), [product]);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const priceParts = formatUZSParts(product.price, lang);
+  const pricing = getProductPricing(product);
+  const basePriceParts = formatUZSParts(pricing.basePrice, lang);
+  const finalPriceParts = formatUZSParts(pricing.priceAfterSubsidy, lang);
+  const subsidyParts = formatUZSParts(pricing.subsidyAmount, lang);
   const activeImageSrc = productImages[activeImageIndex] ?? productImages[0];
   return (
     <motion.div 
@@ -110,6 +114,11 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
             <Badge className="bg-primary/10 text-primary border-none px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
               {product.category?.name ?? product.category_name ?? product.category__name ?? 'Category'}
             </Badge>
+            {pricing.isRecommended ? (
+              <Badge className="bg-amber-50 text-amber-700 border-none px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
+                {t('product.recommendedBadge')}
+              </Badge>
+            ) : null}
           </div>
 
           <h1 className="text-3xl font-black text-gray-900 leading-tight mb-4">
@@ -117,11 +126,59 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
           </h1>
 
           <div className="mb-8">
-            <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-primary leading-none tabular-nums tracking-tight">
-              <span className="text-3xl font-black">{priceParts.amount}</span>
-              <span className="text-xs font-black uppercase tracking-widest text-primary/80">{priceParts.currency}</span>
-            </span>
+            {pricing.hasSubsidy ? (
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-red-500 leading-none tabular-nums tracking-tight">
+                  <span className="text-lg font-semibold line-through">{basePriceParts.amount}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">{basePriceParts.currency}</span>
+                </div>
+                <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-primary leading-none tabular-nums tracking-tight">
+                  <span className="text-3xl font-black">{finalPriceParts.amount}</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-primary/80">{finalPriceParts.currency}</span>
+                </span>
+                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-700">
+                  <span>{t('product.subsidyAmount')}</span>
+                  <span className="tabular-nums">{subsidyParts.amount}</span>
+                </div>
+              </div>
+            ) : (
+              <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-primary leading-none tabular-nums tracking-tight">
+                <span className="text-3xl font-black">{basePriceParts.amount}</span>
+                <span className="text-xs font-black uppercase tracking-widest text-primary/80">{basePriceParts.currency}</span>
+              </span>
+            )}
           </div>
+
+          {pricing.hasSubsidy ? (
+            <div className="mb-10 rounded-3xl border border-emerald-100 bg-emerald-50/60 p-4">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl bg-white/90 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gray-500">
+                    {t('product.basePrice')}
+                  </p>
+                  <p className="mt-1 text-sm font-black text-gray-900 tabular-nums">
+                    {basePriceParts.amount} {basePriceParts.currency}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-white/90 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gray-500">
+                    {t('product.subsidyAmount')}
+                  </p>
+                  <p className="mt-1 text-sm font-black text-emerald-700 tabular-nums">
+                    {subsidyParts.amount} {subsidyParts.currency}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-white/90 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gray-500">
+                    {t('product.priceAfterSubsidy')}
+                  </p>
+                  <p className="mt-1 text-sm font-black text-primary tabular-nums">
+                    {finalPriceParts.amount} {finalPriceParts.currency}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           {product.description ? (
             <div className="space-y-4 mb-10">
@@ -137,8 +194,8 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
         <div className="flex flex-col">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('product.totalPrice')}</span>
           <span className="flex flex-wrap items-baseline gap-x-1 text-gray-900 leading-none tabular-nums tracking-tight">
-            <span className="text-xl font-black">{priceParts.amount}</span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">{priceParts.currency}</span>
+            <span className="text-xl font-black">{finalPriceParts.amount}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">{finalPriceParts.currency}</span>
           </span>
         </div>
         <Button 

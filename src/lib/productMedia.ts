@@ -10,6 +10,7 @@ const isValidImageUrl = (value: string | undefined): value is string => {
 export const getProductImages = (product: Product, max = 3): string[] => {
   const candidates: Array<string | undefined> = [
     product.primary_image_url,
+    ...(Array.isArray(product.images) ? product.images : []),
     ...(Array.isArray(product.image_urls) ? product.image_urls : []),
     product.image_url,
   ];
