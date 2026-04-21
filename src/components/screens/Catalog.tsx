@@ -226,7 +226,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                             {product.name}
                           </h3>
                         </div>
-                        <div className="flex items-center justify-between min-h-[4rem] mt-1">
+                        <div className="flex items-center justify-between min-h-[3.5rem] mt-0.5">
                           {pricing.hasSubsidy ? (
                             <span className="flex flex-col gap-1">
                               <span className="flex flex-wrap items-baseline gap-x-1 text-red-500 leading-none tabular-nums tracking-tight">
@@ -252,7 +252,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                           )}
                           <Button
                             size="sm"
-                            className="rounded-lg h-8 px-3"
+                            className="rounded-lg h-7 px-2.5"
                             onClick={(e) => {
                               e.stopPropagation();
                               dispatchCartFlyFromElement(e.currentTarget, productImage);

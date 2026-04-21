@@ -154,8 +154,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             {product.name}
           </h3>
           
-          <div className="mt-1.5">
-            <div className="flex min-w-0 flex-col min-h-[3.5rem]">
+          <div className="mt-1">
+            <div className="flex min-w-0 flex-col min-h-[3.1rem]">
               <span className="text-xs text-gray-400 font-medium uppercase tracking-tight">{t('product.price')}</span>
               <div className="mt-[2px] space-y-[2px]">
                 {pricing.hasSubsidy ? (
@@ -180,9 +180,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               </div>
             </div>
 
-            <div className="mt-0.5 h-9 flex items-center justify-end">
+            <div className="mt-0 h-8 flex items-center justify-end">
               {quantity > 0 ? (
-                <div className="flex shrink-0 items-center gap-1 rounded-lg bg-primary/10 px-2 py-1">
+                <div className="flex shrink-0 items-center gap-1 rounded-lg bg-primary/10 px-2 py-0.5">
                   <Button
                     size="icon"
                     variant="ghost"
@@ -208,7 +208,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   <Button
                     size="icon"
                     className={[
-                      "rounded-xl h-9 w-9 shadow-md shadow-primary/10 transition-transform",
+                      "rounded-xl h-8 w-8 shadow-md shadow-primary/10 transition-transform",
                       isAnimating ? "scale-95" : "scale-100",
                       "active:scale-95"
                     ].join(' ')}
