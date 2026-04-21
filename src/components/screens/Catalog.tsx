@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Search, LayoutGrid, List, ImageOff, Sparkles } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Search, LayoutGrid, List, ImageOff } from 'lucide-react';
 import { api } from '@/services/api';
 import { CatalogData, Category, Product, CatalogSort } from '@/types';
 import { ProductCard } from '../ProductCard';
@@ -63,15 +63,6 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
   }, [selectedCategory, sortBy]);
 
   const products = catalog?.products ?? [];
-  const recommendedProducts = useMemo(() => {
-    const source =
-      catalog?.recommended_products?.length
-        ? catalog.recommended_products
-        : products.filter((product) => product.is_recommended);
-    return source.filter((product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [catalog?.recommended_products, products, searchQuery]);
 
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -169,27 +160,6 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
           </div>
         ) : (
           <div className="space-y-8">
-            {selectedCategory === 'all' && recommendedProducts.length > 0 ? (
-              <section className="rounded-3xl border border-primary/10 bg-gradient-to-br from-primary/5 via-white to-white p-4 shadow-sm">
-                <div className="mb-4 flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-primary/70">
-                      {t('catalog.recommendedTitle')}
-                    </p>
-                    <p className="mt-1 text-sm text-gray-500">{t('catalog.recommendedSubtitle')}</p>
-                  </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-primary shadow-sm ring-1 ring-primary/10">
-                    <Sparkles size={16} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {recommendedProducts.slice(0, 4).map((product) => (
-                    <ProductCard key={product.id} product={product} onClick={onProductClick} />
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
             {filteredProducts.length > 0 ? (
               <div className={cn(
                 "grid gap-4",
@@ -203,7 +173,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
 
                   return viewMode === 'grid' ? (
                     <div key={product.id} className="animate-in fade-in duration-200">
-                      <ProductCard product={product} onClick={onProductClick} />
+                      <ProductCard product={product} onClick={onProductClick} compactBadges />
                     </div>
                   ) : (
                     <div
@@ -211,7 +181,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                       className="flex gap-4 p-3 bg-white rounded-2xl border border-gray-50 shadow-sm hover:shadow-md transition-all cursor-pointer group"
                       onClick={() => onProductClick(product)}
                     >
-                      <div className="w-24 h-24 rounded-xl bg-gray-50 overflow-hidden flex-shrink-0">
+                      <div className="relative w-24 h-24 rounded-xl bg-gray-50 overflow-hidden flex-shrink-0">
                         {productImage ? (
                           <img
                             src={productImage}
@@ -224,6 +194,13 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                             <ImageOff size={18} />
                           </div>
                         )}
+                        {product.is_recommended ? (
+                          <div className="absolute bottom-2 left-2">
+                            <span className="inline-flex h-6 items-center rounded-full bg-primary px-2.5 text-[10px] font-bold uppercase tracking-widest text-white shadow-sm">
+                              {t('product.recommendedBadge')}
+                            </span>
+                          </div>
+                        ) : null}
                       </div>
                       <div className="flex flex-col justify-between py-1 flex-1 min-w-0">
                         <div>
@@ -269,7 +246,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                   );
                 })}
               </div>
-            ) : recommendedProducts.length === 0 ? (
+            ) : (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-4">
                   <Search size={40} />
@@ -289,7 +266,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                   {t('catalog.clearFilters')}
                 </Button>
               </div>
-            ) : null}
+            )}
           </div>
         )}
       </div>

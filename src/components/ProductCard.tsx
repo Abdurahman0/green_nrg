@@ -16,11 +16,13 @@ import { getProductPricing } from '@/lib/productSubsidy';
 interface ProductCardProps {
   product: Product;
   onClick?: (product: Product) => void;
+  compactBadges?: boolean;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
-  onClick
+  onClick,
+  compactBadges = false,
 }) => {
   const { t, lang } = useI18n();
   const { items, addToCart, updateQuantity } = useCart();
@@ -95,18 +97,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             />
           </button>
           
-          <div className="absolute left-3 top-3 flex flex-wrap gap-2 pr-14">
-            {pricing.isRecommended ? (
-              <Badge className="h-6 rounded-full bg-primary text-white shadow-sm">
-                {t('product.recommendedBadge')}
-              </Badge>
-            ) : null}
-            {pricing.hasSubsidy ? (
-              <Badge className="h-6 rounded-full bg-emerald-50 text-emerald-700 shadow-sm">
-                {t('product.subsidyBadge')}
-              </Badge>
-            ) : null}
-          </div>
+          {compactBadges ? (
+            pricing.isRecommended ? (
+              <div className="absolute bottom-3 left-3">
+                <Badge className="h-6 rounded-full bg-primary text-white shadow-sm">
+                  {t('product.recommendedBadge')}
+                </Badge>
+              </div>
+            ) : null
+          ) : (
+            <div className="absolute left-3 top-3 flex flex-wrap gap-2 pr-14">
+              {pricing.isRecommended ? (
+                <Badge className="h-6 rounded-full bg-primary text-white shadow-sm">
+                  {t('product.recommendedBadge')}
+                </Badge>
+              ) : null}
+              {pricing.hasSubsidy ? (
+                <Badge className="h-6 rounded-full bg-emerald-50 text-emerald-700 shadow-sm">
+                  {t('product.subsidyBadge')}
+                </Badge>
+              ) : null}
+            </div>
+          )}
 
           {(product.category?.name ?? product.category_name ?? product.category__name) && (
             <div className="absolute bottom-3 left-3">
