@@ -38,7 +38,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const pricing = getProductPricing(product);
   const basePriceParts = formatUZSParts(pricing.basePrice, lang);
   const finalPriceParts = formatUZSParts(pricing.priceAfterSubsidy, lang);
-  const subsidyParts = formatUZSParts(pricing.subsidyAmount, lang);
   const recommendedBadgeText = t('product.recommendedBadge');
   const recommendedBadgeTextSize = lang === 'ru' ? 'text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-[10px]';
 
@@ -126,11 +125,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
         
-        <div className="p-4">
-          <div className="mb-3 min-h-6 flex items-center">
+        <div className="p-4 pt-3">
+          <div className="mb-1.5 min-h-5 flex items-center">
             {pricing.isRecommended ? (
               <Badge className={cn(
-                "inline-flex h-6 max-w-full items-center rounded-full bg-primary px-3 font-bold uppercase tracking-[0.06em] text-white shadow-sm",
+                "inline-flex h-5 max-w-full items-center rounded-full bg-primary px-2.5 font-bold uppercase tracking-[0.05em] text-white shadow-sm",
                 recommendedBadgeTextSize
               )}>
                 <span className="whitespace-nowrap">{recommendedBadgeText}</span>
@@ -139,7 +138,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               <Badge
                 aria-hidden="true"
                 className={cn(
-                  "invisible inline-flex h-6 max-w-full items-center rounded-full bg-primary px-3 font-bold uppercase tracking-[0.06em] text-white shadow-sm",
+                  "invisible inline-flex h-5 max-w-full items-center rounded-full bg-primary px-2.5 font-bold uppercase tracking-[0.05em] text-white shadow-sm",
                   recommendedBadgeTextSize
                 )}
               >
@@ -155,24 +154,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             {product.name}
           </h3>
           
-          <div className="mt-3">
-            <div className="flex min-w-0 flex-col min-h-[5.5rem]">
+          <div className="mt-2">
+            <div className="flex min-w-0 flex-col min-h-[4rem]">
               <span className="text-xs text-gray-400 font-medium uppercase tracking-tight">{t('product.price')}</span>
-              <div className="mt-1 space-y-1">
+              <div className="mt-0.5 space-y-0.5">
                 {pricing.hasSubsidy ? (
                   <>
                     <div className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5 text-red-500 leading-none tabular-nums tracking-tight">
-                      <span className="text-xs font-semibold line-through">{basePriceParts.amount}</span>
+                      <span className="text-[10px] font-semibold line-through">{basePriceParts.amount}</span>
                       <span className="text-[10px] font-bold uppercase tracking-widest">{basePriceParts.currency}</span>
                     </div>
                     <span className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5 text-primary leading-none tabular-nums tracking-tight">
                       <span className="font-extrabold text-[clamp(0.95rem,3.8vw,1.125rem)]">{finalPriceParts.amount}</span>
                       <span className="text-[10px] font-bold text-primary/80 uppercase tracking-widest">{finalPriceParts.currency}</span>
                     </span>
-                    <div className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-700">
-                      <span>{t('product.subsidyAmount')}</span>
-                      <span className="tabular-nums">{subsidyParts.amount}</span>
-                    </div>
                   </>
                 ) : (
                   <>
@@ -180,17 +175,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                       <span className="font-extrabold text-[clamp(0.95rem,3.8vw,1.125rem)]">{basePriceParts.amount}</span>
                       <span className="text-[10px] font-bold text-primary/80 uppercase tracking-widest">{basePriceParts.currency}</span>
                     </span>
-                    <div aria-hidden="true" className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5 text-red-500 leading-none tabular-nums tracking-tight invisible">
-                      <span className="text-xs font-semibold line-through">{basePriceParts.amount}</span>
-                      <span className="text-[10px] font-bold uppercase tracking-widest">{basePriceParts.currency}</span>
-                    </div>
-                    <div
-                      aria-hidden="true"
-                      className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-700 invisible"
-                    >
-                      <span>{t('product.subsidyAmount')}</span>
-                      <span className="tabular-nums">{subsidyParts.amount}</span>
-                    </div>
                   </>
                 )}
               </div>
