@@ -12,6 +12,7 @@ const FavoritesContext = createContext<FavoritesContextType | undefined>(undefin
 
 export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [pendingFavoriteIds, setPendingFavoriteIds] = useState<Set<string>>(new Set());
   const pendingTogglesRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   const isFavorite = (productId: string) => favorites.has(productId);
-  const isTogglingFavorite = (productId: string) => pendingTogglesRef.current.has(productId);
+  const isTogglingFavorite = (productId: string) => pendingFavoriteIds.has(productId);
 
   const toggleFavorite = async (productId: string) => {
     if (pendingTogglesRef.current.has(productId)) {
@@ -49,6 +50,11 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
 
     pendingTogglesRef.current.add(productId);
+    setPendingFavoriteIds((prev) => {
+      const next = new Set(prev);
+      next.add(productId);
+      return next;
+    });
     const wasFavorite = favorites.has(productId);
 
     setFavorites((prev) => {
@@ -76,6 +82,11 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       });
     } finally {
       pendingTogglesRef.current.delete(productId);
+      setPendingFavoriteIds((prev) => {
+        const next = new Set(prev);
+        next.delete(productId);
+        return next;
+      });
     }
   };
 
