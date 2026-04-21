@@ -13,6 +13,17 @@ const toNumber = (value: unknown): number => {
   return 0;
 };
 
+const toBoolean = (value: unknown): boolean | undefined => {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value !== 0;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'y'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'n', ''].includes(normalized)) return false;
+  }
+  return undefined;
+};
+
 export interface ProductPricing {
   basePrice: number;
   subsidyEnabled: boolean;
@@ -29,7 +40,7 @@ export const getProductPricing = (product: Product): ProductPricing => {
     (product.price_after_subsidy !== undefined &&
       toNumber(product.price_after_subsidy) > 0 &&
       toNumber(product.price_after_subsidy) < basePrice);
-  const subsidyEnabled = product.subsidy_enabled ?? inferredEnabled;
+  const subsidyEnabled = toBoolean(product.subsidy_enabled) ?? inferredEnabled;
   const fallbackSubsidyAmount = Math.min(basePrice * SUBSIDY_RATE, SUBSIDY_CAP);
   const subsidyAmount = subsidyEnabled
     ? Math.max(0, toNumber(product.subsidy_amount) || fallbackSubsidyAmount)
@@ -47,6 +58,6 @@ export const getProductPricing = (product: Product): ProductPricing => {
     subsidyAmount,
     priceAfterSubsidy,
     hasSubsidy: subsidyEnabled && subsidyAmount > 0 && priceAfterSubsidy < basePrice,
-    isRecommended: Boolean(product.is_recommended),
+    isRecommended: toBoolean(product.is_recommended) ?? false,
   };
 };

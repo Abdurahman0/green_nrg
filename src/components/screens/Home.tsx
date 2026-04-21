@@ -5,7 +5,6 @@ import {
   Loader2,
   PackageCheck,
   Search,
-  ShieldCheck,
   Star,
   Wallet,
 } from 'lucide-react';
@@ -359,11 +358,10 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
     (catalog?.recommended_products?.length
       ? catalog.recommended_products
       : (catalog?.products ?? []).filter((product) => product.is_recommended)) ?? [];
-  const featuredSource =
-    (catalog?.promoted_products?.length ? catalog.promoted_products : catalog?.products) ?? [];
-  const featuredProducts = featuredSource.filter(
-    (product) => !recommendedProducts.some((recommended) => recommended.id === product.id)
-  );
+  const featuredProducts =
+    recommendedProducts.length > 0
+      ? recommendedProducts
+      : (catalog?.promoted_products?.length ? catalog.promoted_products : catalog?.products) ?? [];
   const ordersCount = bootstrap?.order_history?.length ?? 0;
   const favoritesCount = bootstrap?.favorites?.length ?? 0;
   const paymentMethodsCount = bootstrap?.payment_methods?.length ?? 0;
@@ -626,33 +624,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, onProductClick }) => {
           />
         </div>
       </div>
-
-      {recommendedProducts.length > 0 ? (
-        <section className="px-6 mb-10">
-          <div className="rounded-3xl border border-primary/10 bg-gradient-to-br from-primary/5 via-white to-white p-5 shadow-sm">
-            <div className="mb-5 flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-primary/70">
-                  {t('home.recommendedTitle')}
-                </p>
-                <p className="mt-1 text-sm text-gray-500">{t('home.recommendedSubtitle')}</p>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-primary shadow-sm ring-1 ring-primary/10">
-                <ShieldCheck size={16} />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {recommendedProducts.slice(0, 4).map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onClick={onProductClick}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
 
       {/* Featured Products Grid */}
       <section className="px-6 mb-10">

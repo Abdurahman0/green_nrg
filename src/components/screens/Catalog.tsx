@@ -63,20 +63,20 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
   }, [selectedCategory, sortBy]);
 
   const products = catalog?.products ?? [];
-  const recommendedProducts = useMemo(
-    () =>
-      (catalog?.recommended_products ?? []).filter((p) =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    [catalog?.recommended_products, searchQuery]
-  );
+  const recommendedProducts = useMemo(() => {
+    const source =
+      catalog?.recommended_products?.length
+        ? catalog.recommended_products
+        : products.filter((product) => product.is_recommended);
+    return source.filter((product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [catalog?.recommended_products, products, searchQuery]);
 
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
   const sortOptions = [
-    { value: 'price_asc', label: t('catalog.sort.priceAsc') },
-    { value: 'price_desc', label: t('catalog.sort.priceDesc') },
     { value: 'cheap_first', label: t('catalog.sort.cheapFirst') },
     { value: 'expensive_first', label: t('catalog.sort.expensiveFirst') },
   ] as const;

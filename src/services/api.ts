@@ -36,6 +36,17 @@ const toNumber = (value: unknown): number => {
   return 0;
 };
 
+const toBoolean = (value: unknown): boolean | undefined => {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value !== 0;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'y'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'n', ''].includes(normalized)) return false;
+  }
+  return undefined;
+};
+
 const unwrapData = <T>(payload: unknown): T => {
   if (payload && typeof payload === 'object' && 'data' in payload) {
     return (payload as ApiEnvelope<T>).data;
@@ -191,9 +202,7 @@ const normalizeProduct = (product: Record<string, unknown>): Product => {
     .filter((value) => typeof value === 'string' && value.trim())
     .map((value) => String(value));
 
-  const subsidyEnabled = typeof product.subsidy_enabled === 'boolean'
-    ? product.subsidy_enabled
-    : undefined;
+  const subsidyEnabled = toBoolean(product.subsidy_enabled);
   const subsidyAmount = product.subsidy_amount !== undefined ? toNumber(product.subsidy_amount) : undefined;
   const priceAfterSubsidy =
     product.price_after_subsidy !== undefined ? toNumber(product.price_after_subsidy) : undefined;
@@ -205,7 +214,7 @@ const normalizeProduct = (product: Record<string, unknown>): Product => {
     subsidy_enabled: subsidyEnabled,
     subsidy_amount: subsidyAmount,
     price_after_subsidy: priceAfterSubsidy,
-    is_recommended: typeof product.is_recommended === 'boolean' ? product.is_recommended : undefined,
+    is_recommended: toBoolean(product.is_recommended),
     category,
     category_name:
       typeof product.category_name === 'string' ? product.category_name : undefined,
@@ -217,7 +226,7 @@ const normalizeProduct = (product: Record<string, unknown>): Product => {
     image_url: typeof product.image_url === 'string' ? product.image_url : undefined,
     primary_image_url:
       typeof product.primary_image_url === 'string' ? product.primary_image_url : undefined,
-    is_promoted: typeof product.is_promoted === 'boolean' ? product.is_promoted : undefined,
+    is_promoted: toBoolean(product.is_promoted),
     stock_quantity:
       product.stock_quantity !== undefined ? toNumber(product.stock_quantity) : undefined,
     images: images.length ? images : undefined,
