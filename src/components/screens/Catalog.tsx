@@ -226,7 +226,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                             {product.name}
                           </h3>
                         </div>
-                        <div className="flex items-center justify-between min-h-[4.4rem]">
+                        <div className="flex items-center justify-between min-h-[4rem] mt-1">
                           {pricing.hasSubsidy ? (
                             <span className="flex flex-col gap-1">
                               <span className="flex flex-wrap items-baseline gap-x-1 text-red-500 leading-none tabular-nums tracking-tight">

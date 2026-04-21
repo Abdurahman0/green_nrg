@@ -125,8 +125,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
         
-        <div className="p-4 pt-2.5">
-          <div className="mb-1 min-h-4 flex items-center">
+        <div className="px-4 pb-4 pt-0">
+          <div className="mb-0.5 min-h-4 flex items-center">
             {pricing.isRecommended ? (
               <Badge className={cn(
                 "inline-flex h-5 max-w-full items-center rounded-full bg-primary px-2.5 font-bold uppercase tracking-[0.045em] text-white shadow-sm",
@@ -148,7 +148,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
 
           <h3 
-            className="font-semibold text-gray-900 text-sm line-clamp-2 min-h-[2.25rem] cursor-pointer hover:text-primary transition-colors"
+            className="mt-1 font-semibold text-gray-900 text-sm line-clamp-2 min-h-[2.25rem] cursor-pointer hover:text-primary transition-colors"
             onClick={() => onClick?.(product)}
           >
             {product.name}
@@ -180,7 +180,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               </div>
             </div>
 
-            <div className="mt-1.5 h-10 flex items-center justify-end">
+            <div className="mt-0.5 h-9 flex items-center justify-end">
               {quantity > 0 ? (
                 <div className="flex shrink-0 items-center gap-1 rounded-lg bg-primary/10 px-2 py-1">
                   <Button
@@ -208,7 +208,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   <Button
                     size="icon"
                     className={[
-                      "rounded-xl h-10 w-10 shadow-md shadow-primary/10 transition-transform",
+                      "rounded-xl h-9 w-9 shadow-md shadow-primary/10 transition-transform",
                       isAnimating ? "scale-95" : "scale-100",
                       "active:scale-95"
                     ].join(' ')}
