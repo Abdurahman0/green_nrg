@@ -201,7 +201,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                             <span
                               title={recommendedBadgeText}
                               className={cn(
-                                "inline-flex h-5 items-center rounded-full bg-primary px-2 font-bold uppercase tracking-[0.04em] text-white shadow-sm",
+                                "inline-flex h-5 items-center rounded-full bg-primary px-2.5 font-bold uppercase tracking-[0.05em] text-white shadow-sm",
                                 recommendedBadgeTextSize
                               )}
                             >

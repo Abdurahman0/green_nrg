@@ -113,7 +113,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               <Badge
                 title={recommendedBadgeText}
                 className={cn(
-                  "inline-flex h-5 max-w-full items-center rounded-full bg-primary px-2 font-bold uppercase tracking-[0.04em] text-white shadow-sm",
+                  "inline-flex h-5 max-w-full items-center rounded-full bg-primary px-2.5 font-bold uppercase tracking-[0.05em] text-white shadow-sm",
                   recommendedBadgeTextSize
                 )}
               >
