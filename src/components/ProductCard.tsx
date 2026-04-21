@@ -39,7 +39,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const basePriceParts = formatUZSParts(pricing.basePrice, lang);
   const finalPriceParts = formatUZSParts(pricing.priceAfterSubsidy, lang);
   const recommendedBadgeText = t('product.recommendedBadge');
-  const recommendedBadgeShortText = t('product.recommendedBadgeShort');
   const recommendedBadgeTextSize = lang === 'ru' ? 'text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-[10px]';
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -118,7 +117,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   recommendedBadgeTextSize
                 )}
               >
-                <span className="whitespace-nowrap">{recommendedBadgeShortText}</span>
+                <span className="whitespace-nowrap">{recommendedBadgeText}</span>
               </Badge>
             ) : null}
             {!compactBadges && pricing.hasSubsidy ? (

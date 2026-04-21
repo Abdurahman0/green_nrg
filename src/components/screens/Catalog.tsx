@@ -171,7 +171,6 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                   const basePriceParts = formatUZSParts(pricing.basePrice, lang);
                   const finalPriceParts = formatUZSParts(pricing.priceAfterSubsidy, lang);
                   const recommendedBadgeText = t('product.recommendedBadge');
-                  const recommendedBadgeShortText = t('product.recommendedBadgeShort');
                   const recommendedBadgeTextSize = lang === 'ru' ? 'text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-[10px]';
 
                   return viewMode === 'grid' ? (
@@ -206,7 +205,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                                 recommendedBadgeTextSize
                               )}
                             >
-                              {recommendedBadgeShortText}
+                              {recommendedBadgeText}
                             </span>
                           </div>
                         ) : null}
