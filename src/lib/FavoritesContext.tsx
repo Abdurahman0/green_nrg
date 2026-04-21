@@ -54,9 +54,14 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     try {
-      await api.toggleFavorite({ product: productId });
-      const favoriteRows = await api.getFavorites();
-      setFavorites(new Set(favoriteRows.map((row) => row.product)));
+      const response = await api.toggleFavorite({ product: productId });
+      if (response && response.product) {
+        setFavorites((prev) => {
+          const next = new Set(prev);
+          next.add(response.product);
+          return next;
+        });
+      }
     } catch (error) {
       console.error(error);
       setFavorites((prev) => {

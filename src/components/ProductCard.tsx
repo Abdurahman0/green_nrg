@@ -83,11 +83,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </button>
           )}
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               toggleFavorite(product.id);
             }}
-            className="absolute top-3 right-3 p-2 rounded-full bg-white/90 text-gray-500 hover:text-red-500 active:scale-95 transition-transform"
+            className="absolute top-3 right-3 z-20 pointer-events-auto p-2 rounded-full bg-white/90 text-gray-500 hover:text-red-500 active:scale-95 transition-transform"
+            aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
           >
             <Heart
               size={18}
@@ -97,28 +99,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             />
           </button>
           
-          {compactBadges ? (
-            pricing.isRecommended ? (
-              <div className="absolute bottom-3 left-3">
-                <Badge className="h-6 rounded-full bg-primary text-white shadow-sm">
-                  {t('product.recommendedBadge')}
-                </Badge>
-              </div>
-            ) : null
-          ) : (
+          {!compactBadges && pricing.hasSubsidy ? (
             <div className="absolute left-3 top-3 flex flex-wrap gap-2 pr-14">
-              {pricing.isRecommended ? (
-                <Badge className="h-6 rounded-full bg-primary text-white shadow-sm">
-                  {t('product.recommendedBadge')}
-                </Badge>
-              ) : null}
-              {pricing.hasSubsidy ? (
-                <Badge className="h-6 rounded-full bg-emerald-50 text-emerald-700 shadow-sm">
-                  {t('product.subsidyBadge')}
-                </Badge>
-              ) : null}
+              <Badge className="h-6 rounded-full bg-emerald-50 text-emerald-700 shadow-sm">
+                {t('product.subsidyBadge')}
+              </Badge>
             </div>
-          )}
+          ) : null}
 
           {(product.category?.name ?? product.category_name ?? product.category__name) && (
             <div className="absolute bottom-3 left-3">
@@ -130,6 +117,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
         
         <div className="p-4">
+          {pricing.isRecommended ? (
+            <div className="mb-3">
+              <Badge className="h-6 rounded-full bg-primary text-white shadow-sm">
+                {t('product.recommendedBadge')}
+              </Badge>
+            </div>
+          ) : null}
+
           <h3 
             className="font-semibold text-gray-900 text-sm line-clamp-2 min-h-[2.5rem] cursor-pointer hover:text-primary transition-colors"
             onClick={() => onClick?.(product)}
