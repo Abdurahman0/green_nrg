@@ -196,25 +196,25 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                             <ImageOff size={18} />
                           </div>
                         )}
-                        {product.is_recommended ? (
-                          <div className="absolute left-1.5 top-1.5">
-                            <span
-                              title={recommendedBadgeText}
-                              className={cn(
-                                "inline-flex h-6 w-max items-center rounded-full bg-primary px-4 font-bold uppercase tracking-[0.04em] text-white shadow-sm",
-                                recommendedBadgeTextSize
-                              )}
-                            >
-                              {recommendedBadgeText}
-                            </span>
-                          </div>
-                        ) : null}
                       </div>
                       <div className="flex flex-col justify-between py-1 flex-1 min-w-0">
                         <div>
                           <span className="text-[10px] font-bold text-primary uppercase tracking-widest">
                             {product.category?.name ?? product.category_name ?? product.category__name}
                           </span>
+                          {product.is_recommended ? (
+                            <div className="mt-1">
+                              <span
+                                title={recommendedBadgeText}
+                                className={cn(
+                                  "inline-flex h-5 w-max items-center rounded-full bg-primary px-3 font-bold uppercase tracking-[0.04em] text-white shadow-sm",
+                                  recommendedBadgeTextSize
+                                )}
+                              >
+                                {recommendedBadgeText}
+                              </span>
+                            </div>
+                          ) : null}
                           <h3 className="font-bold text-gray-900 text-sm line-clamp-1 mt-0.5">
                             {product.name}
                           </h3>
