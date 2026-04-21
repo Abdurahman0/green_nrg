@@ -197,7 +197,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                           </div>
                         )}
                         {product.is_recommended ? (
-                          <div className="absolute left-2 top-2">
+                          <div className="absolute left-1.5 top-1.5">
                             <span
                               title={recommendedBadgeText}
                               className={cn(

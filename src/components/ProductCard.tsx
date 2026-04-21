@@ -108,7 +108,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             )}
           </button>
           
-          <div className="absolute left-3 top-3 flex max-w-[calc(100%-5.5rem)] flex-col gap-1">
+          <div className="absolute left-2 top-2 flex max-w-[calc(100%-5.5rem)] flex-col gap-1">
             {pricing.isRecommended ? (
               <Badge
                 title={recommendedBadgeText}
