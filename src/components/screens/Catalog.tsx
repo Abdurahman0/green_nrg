@@ -170,6 +170,8 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                   const pricing = getProductPricing(product);
                   const basePriceParts = formatUZSParts(pricing.basePrice, lang);
                   const finalPriceParts = formatUZSParts(pricing.priceAfterSubsidy, lang);
+                  const recommendedBadgeText = t('product.recommendedBadge');
+                  const recommendedBadgeTextSize = lang === 'ru' ? 'text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-[10px]';
 
                   return viewMode === 'grid' ? (
                     <div key={product.id} className="animate-in fade-in duration-200">
@@ -194,24 +196,37 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                             <ImageOff size={18} />
                           </div>
                         )}
-                        {product.is_recommended ? (
-                          <div className="absolute bottom-2 left-2">
-                            <span className="inline-flex h-6 items-center rounded-full bg-primary px-2.5 text-[10px] font-bold uppercase tracking-widest text-white shadow-sm">
-                              {t('product.recommendedBadge')}
-                            </span>
-                          </div>
-                        ) : null}
                       </div>
                       <div className="flex flex-col justify-between py-1 flex-1 min-w-0">
                         <div>
                           <span className="text-[10px] font-bold text-primary uppercase tracking-widest">
                             {product.category?.name ?? product.category_name ?? product.category__name}
                           </span>
+                          <div className="mt-1 min-h-6 flex items-center">
+                            {product.is_recommended ? (
+                              <span className={cn(
+                                "inline-flex h-6 max-w-full items-center rounded-full bg-primary px-3 font-bold uppercase tracking-[0.06em] text-white shadow-sm",
+                                recommendedBadgeTextSize
+                              )}>
+                                <span className="whitespace-nowrap">{recommendedBadgeText}</span>
+                              </span>
+                            ) : (
+                              <span
+                                aria-hidden="true"
+                                className={cn(
+                                  "invisible inline-flex h-6 max-w-full items-center rounded-full bg-primary px-3 font-bold uppercase tracking-[0.06em] text-white shadow-sm",
+                                  recommendedBadgeTextSize
+                                )}
+                              >
+                                <span className="whitespace-nowrap">{recommendedBadgeText}</span>
+                              </span>
+                            )}
+                          </div>
                           <h3 className="font-bold text-gray-900 text-sm line-clamp-1 mt-0.5">
                             {product.name}
                           </h3>
                         </div>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between min-h-[4.4rem]">
                           {pricing.hasSubsidy ? (
                             <span className="flex flex-col gap-1">
                               <span className="flex flex-wrap items-baseline gap-x-1 text-red-500 leading-none tabular-nums tracking-tight">
@@ -224,9 +239,15 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
                               </span>
                             </span>
                           ) : (
-                            <span className="flex flex-wrap items-baseline gap-x-1 text-primary leading-none tabular-nums tracking-tight">
-                              <span className="text-lg font-black">{basePriceParts.amount}</span>
-                              <span className="text-[10px] font-black uppercase tracking-widest text-primary/80">{basePriceParts.currency}</span>
+                            <span className="flex flex-col gap-1">
+                              <span className="flex flex-wrap items-baseline gap-x-1 text-primary leading-none tabular-nums tracking-tight">
+                                <span className="text-lg font-black">{basePriceParts.amount}</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-primary/80">{basePriceParts.currency}</span>
+                              </span>
+                              <span className="flex flex-wrap items-baseline gap-x-1 text-red-500 leading-none tabular-nums tracking-tight invisible">
+                                <span className="text-xs font-semibold line-through">{basePriceParts.amount}</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest">{basePriceParts.currency}</span>
+                              </span>
                             </span>
                           )}
                           <Button
