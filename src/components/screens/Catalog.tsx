@@ -75,7 +75,7 @@ export const Catalog: React.FC<CatalogProps> = ({ onProductClick, onAddToCart })
   return (
     <div className="pb-24">
       {/* Header */}
-      <header className="p-6 pb-2 bg-white sticky top-0 z-30">
+      <header className="p-6 pb-2 bg-white">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">{t('catalog.title')}</h1>
           <div className="flex gap-2">

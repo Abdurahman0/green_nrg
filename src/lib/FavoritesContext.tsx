@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { api } from '@/services/api';
 
 interface FavoritesContextType {
   favorites: Set<string>;
   isFavorite: (productId: string) => boolean;
+  isTogglingFavorite: (productId: string) => boolean;
   toggleFavorite: (productId: string) => Promise<void>;
 }
 
@@ -11,6 +12,7 @@ const FavoritesContext = createContext<FavoritesContextType | undefined>(undefin
 
 export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const pendingTogglesRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     let isMounted = true;
@@ -39,8 +41,14 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   const isFavorite = (productId: string) => favorites.has(productId);
+  const isTogglingFavorite = (productId: string) => pendingTogglesRef.current.has(productId);
 
   const toggleFavorite = async (productId: string) => {
+    if (pendingTogglesRef.current.has(productId)) {
+      return;
+    }
+
+    pendingTogglesRef.current.add(productId);
     const wasFavorite = favorites.has(productId);
 
     setFavorites((prev) => {
@@ -54,14 +62,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     try {
-      const response = await api.toggleFavorite({ product: productId });
-      if (response && response.product) {
-        setFavorites((prev) => {
-          const next = new Set(prev);
-          next.add(response.product);
-          return next;
-        });
-      }
+      await api.toggleFavorite({ product: productId });
     } catch (error) {
       console.error(error);
       setFavorites((prev) => {
@@ -73,11 +74,13 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
         return next;
       });
+    } finally {
+      pendingTogglesRef.current.delete(productId);
     }
   };
 
   return (
-    <FavoritesContext.Provider value={{ favorites, isFavorite, toggleFavorite }}>
+    <FavoritesContext.Provider value={{ favorites, isFavorite, isTogglingFavorite, toggleFavorite }}>
       {children}
     </FavoritesContext.Provider>
   );

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { X, Heart, ShoppingCart, ImageOff } from 'lucide-react';
+import { X, Heart, Loader2, ShoppingCart, ImageOff } from 'lucide-react';
 import { Product } from '@/types';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -23,8 +23,9 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
   onAddToCart,
 }) => {
   const { t, lang } = useI18n();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, isTogglingFavorite, toggleFavorite } = useFavorites();
   const isFav = isFavorite(product.id);
+  const isFavPending = isTogglingFavorite(product.id);
   const productImages = useMemo(() => getProductImages(product, 3), [product]);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const pricing = getProductPricing(product);
@@ -51,14 +52,20 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
         <div className="flex gap-3">
           <button 
             onClick={() => toggleFavorite(product.id)}
-            className="pointer-events-auto p-3 rounded-2xl shadow-sm backdrop-blur-md border transition-all bg-white/80 border-gray-100 text-gray-900 hover:border-red-300 hover:shadow-red-500/10"
+            disabled={isFavPending}
+            aria-busy={isFavPending}
+            className="pointer-events-auto p-3 rounded-2xl shadow-sm backdrop-blur-md border transition-all bg-white/80 border-gray-100 text-gray-900 hover:border-red-300 hover:shadow-red-500/10 disabled:opacity-70 disabled:cursor-wait"
           >
-            <motion.div
-              animate={{ scale: isFav ? [1, 1.3, 1] : 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Heart size={20} fill={isFav ? "#ef4444" : "none"} stroke={isFav ? "#ef4444" : "currentColor"} color={isFav ? "#ef4444" : "currentColor"} />
-            </motion.div>
+            {isFavPending ? (
+              <Loader2 size={20} className="animate-spin text-primary" />
+            ) : (
+              <motion.div
+                animate={{ scale: isFav ? [1, 1.3, 1] : 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Heart size={20} fill={isFav ? "#ef4444" : "none"} stroke={isFav ? "#ef4444" : "currentColor"} color={isFav ? "#ef4444" : "currentColor"} />
+              </motion.div>
+            )}
           </button>
         </div>
       </div>

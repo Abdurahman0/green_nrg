@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Plus, Minus } from 'lucide-react';
+import { Heart, Loader2, Plus, Minus } from 'lucide-react';
 import { Product } from '../types';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -27,12 +27,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const { t, lang } = useI18n();
   const { items, addToCart, updateQuantity } = useCart();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, isTogglingFavorite, toggleFavorite } = useFavorites();
   const [isAnimating, setIsAnimating] = useState(false);
 
   const cartItem = items.find(item => item.id === product.id);
   const quantity = cartItem?.quantity || 0;
   const isFav = isFavorite(product.id);
+  const isFavPending = isTogglingFavorite(product.id);
   const productImage = getProductImage(product);
   const pricing = getProductPricing(product);
   const basePriceParts = formatUZSParts(pricing.basePrice, lang);
@@ -91,15 +92,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               e.stopPropagation();
               toggleFavorite(product.id);
             }}
-            className="absolute top-3 right-3 z-20 pointer-events-auto p-2 rounded-full bg-white/90 text-gray-500 hover:text-red-500 active:scale-95 transition-transform"
+            disabled={isFavPending}
+            aria-busy={isFavPending}
+            className="absolute top-3 right-3 z-20 pointer-events-auto p-2 rounded-full bg-white/90 text-gray-500 hover:text-red-500 active:scale-95 transition-transform disabled:opacity-70 disabled:cursor-wait"
             aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
           >
-            <Heart
-              size={18}
-              fill={isFav ? '#ef4444' : 'none'}
-              stroke={isFav ? '#ef4444' : 'currentColor'}
-              color={isFav ? '#ef4444' : 'currentColor'}
-            />
+            {isFavPending ? (
+              <Loader2 size={18} className="animate-spin text-primary" />
+            ) : (
+              <Heart
+                size={18}
+                fill={isFav ? '#ef4444' : 'none'}
+                stroke={isFav ? '#ef4444' : 'currentColor'}
+                color={isFav ? '#ef4444' : 'currentColor'}
+              />
+            )}
           </button>
           
           {!compactBadges && pricing.hasSubsidy ? (
