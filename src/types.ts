@@ -20,6 +20,7 @@ export interface Category {
   id: string;
   name: string;
   code: string;
+  sort_order?: number;
 }
 
 export interface Product {

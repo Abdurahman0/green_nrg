@@ -238,6 +238,10 @@ const normalizeCategory = (category: Record<string, unknown>): Category => ({
   id: String(category.id ?? ''),
   name: String(category.name ?? ''),
   code: String(category.code ?? ''),
+  sort_order:
+    category.sort_order !== undefined && category.sort_order !== null
+      ? toNumber(category.sort_order)
+      : undefined,
 });
 
 const normalizeOrder = (order: Record<string, unknown>): Order => ({
